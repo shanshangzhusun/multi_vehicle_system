@@ -1,0 +1,25 @@
+{
+  "node_id": "depot_gateway",
+  "listen_host": "0.0.0.0",
+  "listen_port": 9191,
+  "model_host": "192.168.2.10",
+  "model_port": 8888,
+  "node_host": "192.168.2.8",
+  "event_log_path": "logs/depot_gateway_events.jsonl",
+  "message_capture": {
+    "enabled": true,
+    "dir": "result/message_capture/depot/gateway"
+  },
+  "port_groups": [
+    {
+      "start": 8601,
+      "end": 8612,
+      "group": "26D"
+    },
+    {
+      "start": 8613,
+      "end": 8624,
+      "group": "27"
+    }
+  ]
+}

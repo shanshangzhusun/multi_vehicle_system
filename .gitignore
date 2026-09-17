@@ -1,0 +1,49 @@
+# Runtime logs and process outputs
+logs/
+**/logs/
+.run/
+rizhi/
+*.log
+*.jsonl
+
+# Road-network/source map data and generated map data
+luwang_data/
+**/data/
+result/theaters/*/data/
+result/data/
+deliverables/client_route_player/data.json
+deliverables/client_route_player/data.js
+deliverables/client_route_player/road_network.json
+deliverables/client_route_player.tar.gz
+
+# Runtime message captures and generated transient results
+result/message_capture/
+result/relay/
+result/visuals/
+result/results/
+
+# Local caches and Python build artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+
+# Virtual environments and local dependency caches
+.venv/
+venv/
+.conda-env/
+.conda-pkgs/
+
+# Historical local backups are large and duplicate tracked source snapshots
+backups/
+
+# Generated reports/archives
+.VSCodeCounter/
+mvs.zip
+
+# Editor/OS noise
+.DS_Store
+.idea/
+.vscode/

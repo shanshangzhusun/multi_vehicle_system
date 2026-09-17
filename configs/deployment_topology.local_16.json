@@ -1,0 +1,133 @@
+{
+  "network": {
+    "local_host": "127.0.0.8",
+    "advertise_host": "127.0.0.8"
+  },
+  "runtime": {
+    "out_root": "result"
+  },
+  "message_capture": {
+    "enabled": true
+  },
+  "manual_debug": {
+    "enabled": true
+  },
+  "received_dian_capture": {
+    "enabled": true
+  },
+  "map": {
+    "roads_shp": "luwang_data/china-240101-free.shp/gis_osm_roads_free_1.shp",
+    "bbox": "113.269684,31.674006,115.040885,32.797636",
+    "hide_point_count": 0,
+    "launch_point_count": 0
+  },
+  "theaters": [
+    {
+      "id": "henan",
+      "vehicle_port_start": 8414,
+      "vehicle_port_count": 64,
+      "bounds": [113.269684, 31.674006, 115.040885, 32.797636]
+    },
+    {
+      "id": "guangdong",
+      "vehicle_port_start": 8519,
+      "vehicle_port_count": 64,
+      "bounds": [103.272821, 25.195127, 104.305541, 25.893927]
+    }
+  ],
+  "vehicles": {
+    "count": 16,
+    "port_base": 8413,
+    "gateway_port": 9190,
+    "vehicle_start_port": 8414,
+    "vehicle_count": 16,
+    "home_nodes": [],
+    "vehicle_configs": []
+  },
+  "vehicle_tuning": {
+    "speed_mps": 22.222
+  },
+  "model": {
+    "local_host": "127.0.0.10",
+    "host": "127.0.0.10",
+    "port": 8888,
+    "callback_host": "127.0.0.10",
+    "callback_port": 8888,
+    "prelaunch_only": true,
+    "external_vehicle_selection_enabled": true,
+    "require_nodes_for_dispatch": true,
+    "task_start_delay_sec": 8.0,
+    "vehicle_ready_min_online_ratio": 1.0,
+    "vehicle_ready_timeout_sec": 120.0,
+    "vehicle_ready_poll_sec": 0.5,
+    "vehicle_ready_stable_rounds": 2,
+    "task_gap_scale": 0.0125,
+    "auto_stop_on_completion": false,
+    "completion_poll_sec": 2.0,
+    "completion_stable_rounds": 3,
+    "completion_timeout_sec": 7200,
+    "quiet_logs": true
+  },
+  "fire_platform": {
+    "node": {
+      "local_host": "127.0.0.12",
+      "host": "127.0.0.12",
+      "port": 9170,
+      "request_interval_sec": 2.0,
+      "score_port_base": 8414,
+      "score_port_count": 16,
+      "score_select_settle_sec": 1.0,
+      "selection_candidate_limit": 16
+    }
+  },
+  "schedulers": {
+    "count": 1,
+    "node_id_prefix": "scheduler",
+    "listen_port_start": 9120,
+    "dashboard_port_start": 19120,
+    "routing": "primary",
+    "vehicle_partition": "all",
+    "platforms": [
+      {
+        "node_id": "scheduler_001",
+        "listen_port": 9120,
+        "dashboard_port": 19120,
+        "theater_id": "henan",
+        "model_message_type_tag": "26D"
+      }
+    ]
+  },
+  "external_conflict_resolution": {
+    "distance_m": 5.0,
+    "selected_depot_expected_count": 10,
+    "force_emit_bundle_when_unresolved": true
+  },
+  "depot": {
+    "count": 24,
+    "start_port": 8601,
+    "per_theater_count": 12,
+    "gateway_port": 9191,
+    "capacity": 16,
+    "reload_duration_sec": 60.0,
+    "resource_limit": 20,
+    "two_stage_assignment_enabled": true,
+    "assignment_scoring": {
+      "distance_weight_a": 1.0,
+      "distance_rank_weight_b": 100.0,
+      "load_ratio_weight_c": 1000.0,
+      "distance_metric": "euclidean"
+    },
+    "points": [],
+    "software": {
+      "local_host": "127.0.0.8",
+      "host": "127.0.0.8",
+      "reply_host": "127.0.0.8",
+      "port": 9130
+    },
+    "node": {
+      "local_host": "127.0.0.12",
+      "host": "127.0.0.12",
+      "port": 9180
+    }
+  }
+}

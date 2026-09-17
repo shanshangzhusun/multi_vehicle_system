@@ -1,0 +1,31 @@
+{
+  "msg_type": "TASK_PACKAGE",
+  "task_id": "task_wave_01",
+  "launches": [
+    {
+      "subtask_id": "task_wave_01_s001",
+      "ammo_type": "HE",
+      "fire_time": "2026-05-29T17:50:00+08:00"
+    },
+    {
+      "subtask_id": "task_wave_01_s002",
+      "ammo_type": "HE",
+      "fire_time": "2026-05-29T17:50:00+08:00"
+    },
+    {
+      "subtask_id": "task_wave_01_s003",
+      "ammo_type": "HE",
+      "fire_time": "2026-05-29T17:50:00+08:00"
+    },
+    {
+      "subtask_id": "task_wave_01_s004",
+      "ammo_type": "HE",
+      "fire_time": "2026-05-29T17:50:00+08:00"
+    },
+    {
+      "subtask_id": "task_wave_01_s005",
+      "ammo_type": "HE",
+      "fire_time": "2026-05-29T17:50:00+08:00"
+    }
+  ]
+}

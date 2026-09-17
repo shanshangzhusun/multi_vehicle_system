@@ -1,0 +1,29 @@
+{
+  "launch_scoring": {
+    "support_score": 80.0,
+    "support_weight": 0.30,
+    "launch_capacity": 1,
+    "hide_via_weight": 0.15
+  },
+  "vehicle_scoring": {
+    "health": 1.0,
+    "health_weight": 0.15,
+    "fire_pool_bonus": 8.0,
+    "fire_pool_bounds": [
+      114.1552845,
+      31.674006,
+      114.59808475,
+      32.797636
+    ]
+  },
+  "depot_scoring": {
+    "ammo_capacity": 20,
+    "distance_weight_a": 1.0,
+    "distance_rank_weight_b": 100.0,
+    "load_ratio_weight_c": 1000.0
+  },
+  "redundancy": {
+    "enabled": true,
+    "ratio": 0.0
+  }
+}

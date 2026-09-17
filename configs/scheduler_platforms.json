@@ -1,0 +1,12 @@
+{
+  "count": 1,
+  "base_config": "result/configs/scheduler_debug.json",
+  "out_dir": "result/configs/schedulers",
+  "manifest": "result/configs/schedulers_manifest.json",
+  "node_id_prefix": "scheduler",
+  "listen_port_start": 9120,
+  "dashboard_port_start": 19120,
+  "event_log_dir": "logs",
+  "vehicle_partition": "all",
+  "platforms": []
+}

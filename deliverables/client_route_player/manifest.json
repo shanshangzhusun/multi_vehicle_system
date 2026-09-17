@@ -1,0 +1,27 @@
+{
+  "html": "deliverables/client_route_player/player.html",
+  "data": "deliverables/client_route_player/data.json",
+  "script_data": "deliverables/client_route_player/data.js",
+  "road_network": "deliverables/client_route_player/road_network.json",
+  "unit_count": 96,
+  "road_count": 116071,
+  "graphs": [
+    "result/theaters/guangdong/data/road_graph_shp_demo.json",
+    "result/theaters/henan/data/road_graph_shp_demo.json"
+  ],
+  "source": {
+    "mode": "capture_final_send",
+    "file_count": 96,
+    "scheduler_counts": {
+      "scheduler_001": 48,
+      "scheduler_002": 48
+    }
+  },
+  "point_counts": {
+    "a": 192,
+    "b": 192,
+    "c": 24,
+    "s": 128
+  },
+  "blocked_scan": {}
+}

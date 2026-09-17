@@ -1,0 +1,103 @@
+{
+  "out_root": "result",
+  "roads_shp": "luwang_data/china-240101-free.shp/gis_osm_roads_free_1.shp",
+  "bbox": "112.650921,31.174717,115.744501,33.111033",
+  "hide_point_count": 0,
+  "launch_point_count": 0,
+  "vehicles": 64,
+  "snapshot_delay_sec": 0,
+  "wait_after_final_sec": 0,
+  "wait_until_all_done": true,
+  "completion_timeout_sec": 1200,
+  "completion_poll_sec": 0.5,
+  "stop_at_end": false,
+  "dashboard_ready_timeout_sec": 120,
+  "capture_timeout_sec": 30,
+  "render": {
+    "base_preview": false,
+    "map_elements": false,
+    "snapshots": false
+  },
+  "simulation": {
+    "mode": "discrete_event",
+    "settle_delay_sec": 0.05
+  },
+  "vehicle_tuning": {
+    "realtime_scale": 0.0125,
+    "speed_mps": 22.222
+  },
+  "scheduler_tuning": {
+    "tick_sec": 0.4,
+    "heartbeat_timeout_sec": 5.0,
+    "proposal_timeout_sec": 4.0,
+    "max_proposal_retries": 2,
+    "reservation_slot_sec": 1,
+    "reservation_delay_step_sec": 2.0,
+    "reservation_max_delay_sec": 180.0,
+    "reservation_reserve_wait_nodes": false,
+    "reservation_retention_sec": 30.0,
+    "reservation_deadlock_backoff_sec": 5.0,
+    "max_route_candidates": 8,
+    "max_route_candidates_real": 8,
+    "max_route_candidates_reserved": 8,
+    "max_route_candidates_redundant": 4,
+    "to_fire_local_deadlock_retries": 0,
+    "to_fire_local_deadlock_backoff_sec": 0.0,
+    "vehicle_platform_score_enabled": false,
+    "vehicle_platform_score_request_limit_per_subtask": 0,
+    "project_book_enabled": false,
+    "depot_book_enabled": false,
+    "max_active_real_planning_subtasks": 16,
+    "max_active_redundant_planning_subtasks": 4,
+    "max_active_real_planning_per_task": 10,
+    "max_active_redundant_planning_per_task": 2,
+    "max_active_real_task_groups": 2,
+    "max_active_redundant_task_groups": 2
+  },
+  "fire_zone": {
+    "enabled": true,
+    "mode": "half_map",
+    "axis": "x",
+    "side": "east",
+    "bonus_score": 25.0
+  },
+  "depot": {
+    "capacity": 16,
+    "reload_duration_sec": 60.0
+  },
+  "redundancy": {
+    "enabled": true,
+    "ratio": 0.2
+  },
+  "hide_strategy": {
+    "trigger_slack_sec": 60.0,
+    "min_wait_sec": 30.0
+  },
+  "launch_timing": {
+    "hot_distance_threshold_m": 5000.0,
+    "cold_distance_threshold_m": 5000.0,
+    "launch_prepare_sec": 300.0,
+    "hot_standby_sec": 180.0,
+    "cold_standby_sec": 420.0,
+    "hot_startup_sec": 180.0,
+    "cold_startup_sec": 420.0
+  },
+  "waves": [
+    {
+      "task_id": "task_wave_01",
+      "count": 10,
+      "start_after_sec": 2400,
+      "interval_sec": 0,
+      "same_fire_time": true,
+      "gap_after_send_sec": 2280
+    },
+    {
+      "task_id": "task_wave_02",
+      "count": 10,
+      "start_after_sec": 2460,
+      "interval_sec": 0,
+      "same_fire_time": true,
+      "gap_after_send_sec": 2520
+    }
+  ]
+}

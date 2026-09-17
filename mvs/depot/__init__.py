@@ -1,0 +1,1 @@
+"""Depot platform simulation components."""

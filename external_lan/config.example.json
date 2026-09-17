@@ -1,0 +1,55 @@
+{
+  "scheduler_software": {
+    "host": "127.0.0.1",
+    "port": 9120
+  },
+  "depot_software": {
+    "host": "127.0.0.1",
+    "port": 9130
+  },
+  "vehicles_dir": "result/configs/vehicles",
+  "scheduler_model": {
+    "node_id": "scheduler_model",
+    "host": "0.0.0.0",
+    "advertise_host": "127.0.0.1",
+    "port": 9160,
+    "scheduler_routing": "primary",
+    "context_refresh_attempts": 20,
+    "context_refresh_interval_sec": 0.8
+  },
+  "fire_platform_model": {
+    "node_id": "fire_platform_model",
+    "host": "0.0.0.0",
+    "advertise_host": "127.0.0.1",
+    "port": 9140
+  },
+  "fire_platform_node": {
+    "node_id": "fire_platform_node",
+    "host": "0.0.0.0",
+    "advertise_host": "127.0.0.1",
+    "port": 9170,
+    "request_interval_sec": 10.0,
+    "sample_vehicle_count": 8
+  },
+  "depot_model": {
+    "node_id": "depot_model",
+    "host": "0.0.0.0",
+    "advertise_host": "127.0.0.1",
+    "port": 9150
+  },
+  "depot_node": {
+    "node_id": "depot_node",
+    "host": "0.0.0.0",
+    "advertise_host": "127.0.0.1",
+    "port": 9180,
+    "request_interval_sec": 10.0
+  },
+  "tcp": {
+    "connect_timeout_sec": 1.5,
+    "read_timeout_sec": 2.0,
+    "max_retries": 1,
+    "retry_backoff_sec": 0.1,
+    "max_payload_bytes": 4194304,
+    "listen_backlog": 512
+  }
+}

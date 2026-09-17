@@ -1,0 +1,3100 @@
+{
+  "node_id": "scheduler_002",
+  "listen_host": "0.0.0.0",
+  "listen_port": 9121,
+  "transport": {
+    "type": "tcp",
+    "tcp": {
+      "connect_timeout_sec": 1.5,
+      "read_timeout_sec": 2.0,
+      "max_retries": 3,
+      "retry_backoff_sec": 0.15
+    },
+    "kafka": {
+      "bootstrap_servers": [
+        "127.0.0.1:9092"
+      ],
+      "topic_task_package": "mvs.task.package",
+      "topic_vehicle_telemetry": "mvs.vehicle.telemetry",
+      "topic_command_prefix": "mvs.scheduler.command",
+      "consumer_group": "mvs.default",
+      "client_id": "mvs-scheduler"
+    }
+  },
+  "lane_graph_cache_limit": 65536,
+  "lane_graph_prewarm": {
+    "enabled": false,
+    "mode": "background",
+    "include_hide_points": false,
+    "include_return_home": false,
+    "max_pairs": 2000,
+    "stop_on_work": true
+  },
+  "dashboard_host": "0.0.0.0",
+  "dashboard_port": 19121,
+  "tick_sec": 0.4,
+  "heartbeat_timeout_sec": 5.0,
+  "proposal_timeout_sec": 4.0,
+  "max_proposal_retries": 2,
+  "reservation_slot_sec": 1,
+  "reservation_delay_step_sec": 2.0,
+  "reservation_max_delay_sec": 180.0,
+  "reservation_reserve_wait_nodes": false,
+  "reservation_retention_sec": 30.0,
+  "reservation_deadlock_backoff_sec": 5.0,
+  "depot_capacity": 16,
+  "reload_duration_sec": 60.0,
+  "depot_platform": {
+    "enabled": true,
+    "host": "192.168.2.8",
+    "port": 9130,
+    "reply_host": "192.168.2.8",
+    "assignment_timeout_sec": 4.0,
+    "connect_timeout_sec": 0.35,
+    "ack_timeout_sec": 0.8,
+    "max_failures": 3
+  },
+  "redundancy": {
+    "enabled": true,
+    "ratio": 0.0
+  },
+  "launch_timing": {
+    "hot_distance_threshold_m": 5000.0,
+    "cold_distance_threshold_m": 5000.0,
+    "launch_prepare_sec": 300.0,
+    "hot_standby_sec": 180.0,
+    "cold_standby_sec": 420.0,
+    "hot_startup_sec": 180.0,
+    "cold_startup_sec": 420.0
+  },
+  "allowed_ammo_types": [
+    "HE",
+    "AP",
+    "SMOKE"
+  ],
+  "max_task_launches": 128,
+  "reject_past_fire_time": false,
+  "past_time_grace_sec": 30.0,
+  "map": {
+    "source_type": "graph_json",
+    "graph_json": "result/theaters/guangdong/data/road_graph_shp_demo.json",
+    "points_json": "result/theaters/guangdong/data/special_points_shp_demo.json",
+    "xodr_path": "",
+    "shp_path": "",
+    "shp_points_path": "",
+    "default_lane_width_m": 8.0,
+    "default_speed_limit_mps": 10.0
+  },
+  "assignment_scoring": {
+    "distance_weight": 35.0,
+    "travel_time_weight": 40.0,
+    "lateness_penalty_weight": 1.2,
+    "fire_zone_bonus": 25.0,
+    "vehicle_platform_score": {
+      "enabled": false,
+      "request_limit_per_subtask": 0
+    },
+    "project_book": {
+      "enabled": false,
+      "w_distance": 1.0,
+      "w_hide": 0.6,
+      "w_support": 1.2,
+      "support_radius_m": 5000.0,
+      "depot_score_default": 80.0,
+      "count_weight": 0.4,
+      "mean_weight": 0.35,
+      "route_match_weight": 0.25,
+      "max_nearby_depots": 3,
+      "decision_weight": 4.0
+    },
+    "depot_book": {
+      "enabled": false,
+      "busy_alpha": 1.0,
+      "prep_beta": 1.0,
+      "time_nearest_vehicle_k": 3,
+      "min_time_ratio": 0.001
+    },
+    "max_route_candidates": 8,
+    "max_route_candidates_real": 8,
+    "max_route_candidates_reserved": 8,
+    "max_route_candidates_redundant": 4,
+    "max_active_real_planning_subtasks": 16,
+    "max_active_redundant_planning_subtasks": 4,
+    "max_active_real_planning_per_task": 10,
+    "max_active_redundant_planning_per_task": 2,
+    "max_active_real_task_groups": 2,
+    "max_active_redundant_task_groups": 2,
+    "max_lateness_sec": 5.0,
+    "fire_window_grace_sec": 15.0,
+    "fire_window_grace_after_resets": 2,
+    "max_assignment_resets": 8,
+    "to_fire_deadlock_bypass_after_resets": 0,
+    "to_fire_local_deadlock_retries": 1,
+    "to_fire_local_deadlock_backoff_sec": 0.5,
+    "max_no_candidate_ticks": 32
+  },
+  "fire_zone": {
+    "enabled": true,
+    "mode": "half_map",
+    "axis": "x",
+    "side": "east",
+    "bbox": [
+      -923.334,
+      -73984.61,
+      95939.163,
+      76925.925
+    ],
+    "bonus_score": 25.0,
+    "description": "half_map_east"
+  },
+  "launch_capability": {},
+  "vehicles": [
+    {
+      "vehicle_id": "8519",
+      "host": "192.168.2.8",
+      "port": 8519,
+      "home_node": "r_n2451",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 7.55,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 12.4,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.08065,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8520",
+      "host": "192.168.2.8",
+      "port": 8520,
+      "home_node": "r_n1440",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 7.9,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 13.3,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.07519,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8521",
+      "host": "192.168.2.8",
+      "port": 8521,
+      "home_node": "r_n53108",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 8.25,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 14.2,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.07042,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8522",
+      "host": "192.168.2.8",
+      "port": 8522,
+      "home_node": "r_n135406",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 7.2,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 11.5,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.08696,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8523",
+      "host": "192.168.2.8",
+      "port": 8523,
+      "home_node": "r_n39041",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 7.55,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 12.4,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.08065,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8524",
+      "host": "192.168.2.8",
+      "port": 8524,
+      "home_node": "r_n38888",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 7.9,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 13.3,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.07519,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8525",
+      "host": "192.168.2.8",
+      "port": 8525,
+      "home_node": "r_n9478",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 8.25,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 14.2,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.07042,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8526",
+      "host": "192.168.2.8",
+      "port": 8526,
+      "home_node": "r_n41962",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 7.2,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 11.5,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.08696,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8527",
+      "host": "192.168.2.8",
+      "port": 8527,
+      "home_node": "r_n14051",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 7.55,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 12.4,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.08065,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8528",
+      "host": "192.168.2.8",
+      "port": 8528,
+      "home_node": "r_n126766",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 7.9,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 13.3,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.07519,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8529",
+      "host": "192.168.2.8",
+      "port": 8529,
+      "home_node": "r_n19238",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 8.25,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 14.2,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.07042,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8530",
+      "host": "192.168.2.8",
+      "port": 8530,
+      "home_node": "r_n51714",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 7.2,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 11.5,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.08696,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8531",
+      "host": "192.168.2.8",
+      "port": 8531,
+      "home_node": "r_n62552",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 7.55,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 12.4,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.08065,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8532",
+      "host": "192.168.2.8",
+      "port": 8532,
+      "home_node": "r_n51218",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 7.9,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 13.3,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.07519,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8533",
+      "host": "192.168.2.8",
+      "port": 8533,
+      "home_node": "r_n42541",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 8.25,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 14.2,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.07042,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8534",
+      "host": "192.168.2.8",
+      "port": 8534,
+      "home_node": "r_n38663",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 7.2,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 11.5,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.08696,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8535",
+      "host": "192.168.2.8",
+      "port": 8535,
+      "home_node": "r_n68177",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 7.55,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 12.4,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.08065,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8536",
+      "host": "192.168.2.8",
+      "port": 8536,
+      "home_node": "r_n59385",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 7.9,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 13.3,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.07519,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8537",
+      "host": "192.168.2.8",
+      "port": 8537,
+      "home_node": "r_n66840",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 8.25,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 14.2,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.07042,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8538",
+      "host": "192.168.2.8",
+      "port": 8538,
+      "home_node": "r_n55062",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 7.2,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 11.5,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.08696,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8539",
+      "host": "192.168.2.8",
+      "port": 8539,
+      "home_node": "r_n14141",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 7.55,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 12.4,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.08065,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8540",
+      "host": "192.168.2.8",
+      "port": 8540,
+      "home_node": "r_n68798",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 7.9,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 13.3,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.07519,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8541",
+      "host": "192.168.2.8",
+      "port": 8541,
+      "home_node": "r_n825",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 8.25,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 14.2,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.07042,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8542",
+      "host": "192.168.2.8",
+      "port": 8542,
+      "home_node": "r_n5376",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 7.2,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 11.5,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.08696,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8543",
+      "host": "192.168.2.8",
+      "port": 8543,
+      "home_node": "r_n9088",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 7.55,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 12.4,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.08065,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8544",
+      "host": "192.168.2.8",
+      "port": 8544,
+      "home_node": "r_n52512",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 7.9,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 13.3,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.07519,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8545",
+      "host": "192.168.2.8",
+      "port": 8545,
+      "home_node": "r_n60035",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 8.25,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 14.2,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.07042,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8546",
+      "host": "192.168.2.8",
+      "port": 8546,
+      "home_node": "r_n23271",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 7.2,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 11.5,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.08696,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8547",
+      "host": "192.168.2.8",
+      "port": 8547,
+      "home_node": "r_n65447",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 7.55,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 12.4,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.08065,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8548",
+      "host": "192.168.2.8",
+      "port": 8548,
+      "home_node": "r_n52643",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 7.9,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 13.3,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.07519,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8549",
+      "host": "192.168.2.8",
+      "port": 8549,
+      "home_node": "r_n67281",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 8.25,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 14.2,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.07042,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8550",
+      "host": "192.168.2.8",
+      "port": 8550,
+      "home_node": "r_n8351",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 7.2,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 11.5,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.08696,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8551",
+      "host": "192.168.2.8",
+      "port": 8551,
+      "home_node": "r_n8628",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 7.55,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 12.4,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.08065,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8552",
+      "host": "192.168.2.8",
+      "port": 8552,
+      "home_node": "r_n23572",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 7.9,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 13.3,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.07519,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8553",
+      "host": "192.168.2.8",
+      "port": 8553,
+      "home_node": "r_n3647",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 8.25,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 14.2,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.07042,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8554",
+      "host": "192.168.2.8",
+      "port": 8554,
+      "home_node": "r_n70788",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 7.2,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 11.5,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.08696,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8555",
+      "host": "192.168.2.8",
+      "port": 8555,
+      "home_node": "r_n53987",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 7.55,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 12.4,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.08065,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8556",
+      "host": "192.168.2.8",
+      "port": 8556,
+      "home_node": "r_n54035",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 7.9,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 13.3,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.07519,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8557",
+      "host": "192.168.2.8",
+      "port": 8557,
+      "home_node": "r_n18390",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 8.25,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 14.2,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.07042,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8558",
+      "host": "192.168.2.8",
+      "port": 8558,
+      "home_node": "r_n3370",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 7.2,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 11.5,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.08696,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8559",
+      "host": "192.168.2.8",
+      "port": 8559,
+      "home_node": "r_n65553",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 7.55,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 12.4,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.08065,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8560",
+      "host": "192.168.2.8",
+      "port": 8560,
+      "home_node": "r_n44153",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 7.9,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 13.3,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.07519,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8561",
+      "host": "192.168.2.8",
+      "port": 8561,
+      "home_node": "r_n128630",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 8.25,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 14.2,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.07042,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8562",
+      "host": "192.168.2.8",
+      "port": 8562,
+      "home_node": "r_n6510",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 7.2,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 11.5,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.08696,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8563",
+      "host": "192.168.2.8",
+      "port": 8563,
+      "home_node": "r_n119638",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 7.55,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 12.4,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.08065,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8564",
+      "host": "192.168.2.8",
+      "port": 8564,
+      "home_node": "r_n6529",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 7.9,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 13.3,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.07519,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8565",
+      "host": "192.168.2.8",
+      "port": 8565,
+      "home_node": "r_n69720",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 8.25,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 14.2,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.07042,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8566",
+      "host": "192.168.2.8",
+      "port": 8566,
+      "home_node": "r_n131516",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 7.2,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 11.5,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.08696,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8567",
+      "host": "192.168.2.8",
+      "port": 8567,
+      "home_node": "r_n2052",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 7.55,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 12.4,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.08065,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8568",
+      "host": "192.168.2.8",
+      "port": 8568,
+      "home_node": "r_n54020",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 7.9,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 13.3,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.07519,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8569",
+      "host": "192.168.2.8",
+      "port": 8569,
+      "home_node": "r_n58717",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 8.25,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 14.2,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.07042,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8570",
+      "host": "192.168.2.8",
+      "port": 8570,
+      "home_node": "r_n6646",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 7.2,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 11.5,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.08696,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8571",
+      "host": "192.168.2.8",
+      "port": 8571,
+      "home_node": "r_n43440",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 7.55,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 12.4,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.08065,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8572",
+      "host": "192.168.2.8",
+      "port": 8572,
+      "home_node": "r_n56478",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 7.9,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 13.3,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.07519,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8573",
+      "host": "192.168.2.8",
+      "port": 8573,
+      "home_node": "r_n23114",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 8.25,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 14.2,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.07042,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8574",
+      "host": "192.168.2.8",
+      "port": 8574,
+      "home_node": "r_n14602",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 7.2,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 11.5,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.08696,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8575",
+      "host": "192.168.2.8",
+      "port": 8575,
+      "home_node": "r_n13178",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 7.55,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 12.4,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.08065,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8576",
+      "host": "192.168.2.8",
+      "port": 8576,
+      "home_node": "r_n13177",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 7.9,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 13.3,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.07519,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8577",
+      "host": "192.168.2.8",
+      "port": 8577,
+      "home_node": "r_n6173",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 8.25,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 14.2,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.07042,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8578",
+      "host": "192.168.2.8",
+      "port": 8578,
+      "home_node": "r_n71002",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 7.2,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 11.5,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.08696,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8579",
+      "host": "192.168.2.8",
+      "port": 8579,
+      "home_node": "r_n67185",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 7.55,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 12.4,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.08065,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8580",
+      "host": "192.168.2.8",
+      "port": 8580,
+      "home_node": "r_n7865",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 7.9,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 13.3,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.07519,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8581",
+      "host": "192.168.2.8",
+      "port": 8581,
+      "home_node": "r_n74603",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 8.25,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 14.2,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.07042,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    },
+    {
+      "vehicle_id": "8582",
+      "host": "192.168.2.8",
+      "port": 8582,
+      "home_node": "r_n58483",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 7.2,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 11.5,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.08696,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      },
+      "theater_id": "guangdong"
+    }
+  ],
+  "theaters": [
+    {
+      "id": "henan",
+      "params_file": "configs/theater_params/henan.json",
+      "vehicle_port_start": 8414,
+      "vehicle_port_count": 64,
+      "bounds": [
+        113.269684,
+        31.674006,
+        115.040885,
+        32.797636
+      ],
+      "launch_scoring": {
+        "support_score": 80.0,
+        "support_weight": 0.3,
+        "launch_capacity": 1,
+        "hide_via_weight": 0.15
+      },
+      "vehicle_scoring": {
+        "health": 1.0,
+        "health_weight": 0.15,
+        "fire_pool_bonus": 8.0,
+        "fire_pool_bounds": [
+          112.650921,
+          31.174717,
+          114.197711,
+          33.111033
+        ]
+      },
+      "depot_scoring": {
+        "ammo_capacity": 20,
+        "distance_weight_a": 1.0,
+        "distance_rank_weight_b": 100.0,
+        "load_ratio_weight_c": 1000.0
+      },
+      "redundancy": {
+        "enabled": true,
+        "ratio": 0.0
+      },
+      "map_override": {
+        "source_type": "graph_json",
+        "graph_json": "result/theaters/henan/data/road_graph_shp_demo.json",
+        "points_json": "result/theaters/henan/data/special_points_shp_demo.json"
+      },
+      "vehicle_map_override": {
+        "source_type": "graph_json",
+        "graph_json": "result/theaters/henan/data/road_graph_shp_demo.json",
+        "points_json": "result/theaters/henan/data/special_points_shp_demo.json"
+      },
+      "scheduler_map_override": {
+        "source_type": "graph_json",
+        "graph_json": "result/theaters/henan/data/road_graph_shp_demo.json",
+        "points_json": "result/theaters/henan/data/special_points_shp_demo.json"
+      }
+    },
+    {
+      "id": "guangdong",
+      "params_file": "configs/theater_params/guangdong.json",
+      "vehicle_port_start": 8519,
+      "vehicle_port_count": 64,
+      "bounds": [
+        103.272821,
+        25.195127,
+        104.305541,
+        25.893927
+      ],
+      "launch_scoring": {
+        "support_score": 80.0,
+        "support_weight": 0.3,
+        "launch_capacity": 1,
+        "hide_via_weight": 0.15
+      },
+      "vehicle_scoring": {
+        "health": 1.0,
+        "health_weight": 0.15,
+        "fire_pool_bonus": 8.0,
+        "fire_pool_bounds": [
+          102.937165,
+          24.896966,
+          103.820278,
+          25.986172
+        ]
+      },
+      "depot_scoring": {
+        "ammo_capacity": 20,
+        "distance_weight_a": 1.0,
+        "distance_rank_weight_b": 100.0,
+        "load_ratio_weight_c": 1000.0
+      },
+      "redundancy": {
+        "enabled": true,
+        "ratio": 0.0
+      },
+      "map_override": {
+        "source_type": "graph_json",
+        "graph_json": "result/theaters/guangdong/data/road_graph_shp_demo.json",
+        "points_json": "result/theaters/guangdong/data/special_points_shp_demo.json"
+      },
+      "vehicle_map_override": {
+        "source_type": "graph_json",
+        "graph_json": "result/theaters/guangdong/data/road_graph_shp_demo.json",
+        "points_json": "result/theaters/guangdong/data/special_points_shp_demo.json"
+      },
+      "scheduler_map_override": {
+        "source_type": "graph_json",
+        "graph_json": "result/theaters/guangdong/data/road_graph_shp_demo.json",
+        "points_json": "result/theaters/guangdong/data/special_points_shp_demo.json"
+      }
+    }
+  ],
+  "theater_params": {
+    "henan": {
+      "launch_scoring": {
+        "support_score": 80.0,
+        "support_weight": 0.3,
+        "launch_capacity": 1,
+        "hide_via_weight": 0.15
+      },
+      "vehicle_scoring": {
+        "health": 1.0,
+        "health_weight": 0.15,
+        "fire_pool_bonus": 8.0,
+        "fire_pool_bounds": [
+          112.650921,
+          31.174717,
+          114.197711,
+          33.111033
+        ]
+      },
+      "depot_scoring": {
+        "ammo_capacity": 20,
+        "distance_weight_a": 1.0,
+        "distance_rank_weight_b": 100.0,
+        "load_ratio_weight_c": 1000.0
+      },
+      "redundancy": {
+        "enabled": true,
+        "ratio": 0.0
+      }
+    },
+    "guangdong": {
+      "launch_scoring": {
+        "support_score": 80.0,
+        "support_weight": 0.3,
+        "launch_capacity": 1,
+        "hide_via_weight": 0.15
+      },
+      "vehicle_scoring": {
+        "health": 1.0,
+        "health_weight": 0.15,
+        "fire_pool_bonus": 8.0,
+        "fire_pool_bounds": [
+          102.937165,
+          24.896966,
+          103.820278,
+          25.986172
+        ]
+      },
+      "depot_scoring": {
+        "ammo_capacity": 20,
+        "distance_weight_a": 1.0,
+        "distance_rank_weight_b": 100.0,
+        "load_ratio_weight_c": 1000.0
+      },
+      "redundancy": {
+        "enabled": true,
+        "ratio": 0.0
+      }
+    }
+  },
+  "depot_ammo_capacity": 20,
+  "disable_redundancy": false,
+  "two_stage_depot_assignment": {
+    "enabled": true,
+    "depot_host": "192.168.2.8",
+    "distance_weight_a": 1.0,
+    "distance_rank_weight_b": 100.0,
+    "load_ratio_weight_c": 1000.0,
+    "distance_metric": "euclidean"
+  },
+  "prelaunch_only": true,
+  "external_vehicle_selection_enabled": true,
+  "external_conflict_resolution": {
+    "distance_m": 5.0,
+    "selected_depot_expected_count": 10,
+    "force_emit_bundle_when_unresolved": true
+  },
+  "vehicle_scoring_context": {
+    "enabled": true,
+    "score_submit_host": "192.168.2.12",
+    "score_port_base": 8414,
+    "score_port_count": 128,
+    "score_ports": [
+      8414,
+      8415,
+      8416,
+      8417,
+      8418,
+      8419,
+      8420,
+      8421,
+      8422,
+      8423,
+      8424,
+      8425,
+      8426,
+      8427,
+      8428,
+      8429,
+      8430,
+      8431,
+      8432,
+      8433,
+      8434,
+      8435,
+      8436,
+      8437,
+      8438,
+      8439,
+      8440,
+      8441,
+      8442,
+      8443,
+      8444,
+      8445,
+      8446,
+      8447,
+      8448,
+      8449,
+      8450,
+      8451,
+      8452,
+      8453,
+      8454,
+      8455,
+      8456,
+      8457,
+      8458,
+      8459,
+      8460,
+      8461,
+      8462,
+      8463,
+      8464,
+      8465,
+      8466,
+      8467,
+      8468,
+      8469,
+      8470,
+      8471,
+      8472,
+      8473,
+      8474,
+      8475,
+      8476,
+      8477,
+      8519,
+      8520,
+      8521,
+      8522,
+      8523,
+      8524,
+      8525,
+      8526,
+      8527,
+      8528,
+      8529,
+      8530,
+      8531,
+      8532,
+      8533,
+      8534,
+      8535,
+      8536,
+      8537,
+      8538,
+      8539,
+      8540,
+      8541,
+      8542,
+      8543,
+      8544,
+      8545,
+      8546,
+      8547,
+      8548,
+      8549,
+      8550,
+      8551,
+      8552,
+      8553,
+      8554,
+      8555,
+      8556,
+      8557,
+      8558,
+      8559,
+      8560,
+      8561,
+      8562,
+      8563,
+      8564,
+      8565,
+      8566,
+      8567,
+      8568,
+      8569,
+      8570,
+      8571,
+      8572,
+      8573,
+      8574,
+      8575,
+      8576,
+      8577,
+      8578,
+      8579,
+      8580,
+      8581,
+      8582
+    ]
+  },
+  "model_callback": {
+    "enabled": true,
+    "host": "192.168.2.10",
+    "port": 8888
+  },
+  "message_capture": {
+    "enabled": true,
+    "dir": "result/message_capture/scheduler/scheduler_shp_demo"
+  },
+  "manual_debug": {
+    "enabled": true
+  },
+  "event_log_path": "logs/scheduler_002_events.jsonl",
+  "scheduler_theater_id": "guangdong",
+  "model_message_type_tag": "27",
+  "launch_scoring": {
+    "support_score": 80.0,
+    "support_weight": 0.3,
+    "launch_capacity": 1,
+    "hide_via_weight": 0.15
+  },
+  "vehicle_scoring": {
+    "health": 1.0,
+    "health_weight": 0.15,
+    "fire_pool_bonus": 8.0,
+    "fire_pool_bounds": [
+      102.937165,
+      24.896966,
+      103.820278,
+      25.986172
+    ]
+  }
+}

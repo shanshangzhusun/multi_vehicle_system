@@ -1,0 +1,948 @@
+多车调度规划项目代码实现说明
+面向任务书/公式/甲方讲解版本
+更新时间：2026-07-19
+
+一、本文档用途
+
+这份文档用于帮助讲解当前 multi_vehicle_system 项目是如何按照任务书要求实现“调度、车辆规划、贮备库评分、选车选库、冲突消解、最终轨迹下发”的。
+
+讲解时可以按三层来讲：
+1. 全流程：调度收点位和任务，生成候选上下文，模型返回选择结果，车辆返回候选路径，调度统一冲突消解，最终生成无冲突轨迹。
+2. 公式落地：任务书公式不是只写在文档里，而是集中落到 mvs/common/formula_utils.py，并在 mvs/common/scoring.py、车辆规划、调度消解、贮备库评分中使用。
+3. 工程边界：有些公式在当前数据字段足够时直接参与计算，有些作为可追踪的公式字段输出，有些作为后续模型/数据完善后的接口保留；不会为了公式展示破坏原来的功能。
+
+
+二、当前核心文件
+
+1. 公式实现
+   mvs/common/formula_utils.py
+   这里集中实现任务书公式，包括发射点代价、时间窗冲突、容量冲突、车辆优先级、贮备库容量、神经网络 ETA 支持、拓扑代价、隐蔽点搜索范围、发射平台评分、贮备库评分等。
+
+2. 评分封装
+   mvs/common/scoring.py
+   这里把公式包装成当前业务能直接使用的评分函数，包括：
+   - vehicle_score：车辆到发射点的基础评分。
+   - compute_dispatch_priority：任务书车辆优先级 P(i)。
+   - score_launch_point_for_vehicle：任务书语义的发射点候选评分。
+   - score_vehicle_task_execution：任务书语义的车辆任务执行评分。
+   - score_depot_task_execution：任务书语义的贮备库任务评分。
+   - DepotScorer：贮备库动态评分器。
+
+3. 车辆端
+   mvs/vehicle/vehicle_app.py
+   车辆接收调度发来的候选上下文和时序上下文，单车规划候选路径。若收到贮备库候选点，则规划发射后到贮备库、补充、回起点的后续路径；若没有收到贮备库候选点，则只规划发射前路径。
+
+4. 神经网络时间预测
+   mvs/vehicle/time_predictor.py
+   提供无第三方依赖的 JSON MLP 推理器。离线 openEuler 服务器不用装 PyTorch 也能运行，只要把训练好的网络权重导出为 JSON 即可。没有模型文件时会自动使用距离/速度的 fallback，不阻断原流程。
+
+5. 调度端
+   mvs/scheduler/scheduler_app.py
+   负责候选上下文生成、选车结果接收、选库结果接收、候选路径接收、外部调度冲突消解、贮备库射后路段合并、最终轨迹 bundle 下发。
+
+6. 贮备库端
+   mvs/depot/depot_app.py
+   贮备库进程。接收贮备库上下文或评分请求，计算自身/候选贮备库评分，返回 DEPOT_SCORE_RESPONSE。
+
+7. 贮备库 gateway
+   mvs/depot/depot_gateway.py
+   监听 9191，接收模拟节点或真实端发送的 REQUEST_DEPOT_SCORE，并按端口/分组转发给模型，同时写 gateway 日志和 message_capture。
+
+8. 启动与辅助脚本
+   scripts/run_three_platform_flow.sh
+   scripts/send_vehicle_score_requests_mapped.sh
+   scripts/send_depot_score_requests_mapped.sh
+   scripts/replay_conflict_resolution.py
+   scripts/build_trajectory_player.py
+
+
+三、运行配置入口
+
+当前主要配置文件：
+configs/deployment_topology.local_192.json
+
+关键配置：
+1. 车辆 gateway：
+   vehicles.gateway_port = 9190
+   vehicles.vehicle_start_port = 8414
+   vehicles.enable_extended_128 = true
+   vehicles.extended_vehicle_start_port = 8519
+
+2. 车辆速度：
+   vehicle_tuning.speed_mps = 22.222
+   约等于 80 km/h。当前已经不使用道路类型限速表作为主要速度约束，而是统一按配置速度进行规划和时间估计。之后如果神经网络 ETA 完整接入，也是在这个基础上替代路段耗时估计。
+
+3. 模型侧：
+   model.prelaunch_only = true
+   表示模型侧主要做射前选车/评分流程；射后贮备库路径由车辆候选结果和调度选库结果共同决定。
+
+4. 外部冲突消解：
+   external_conflict_resolution.distance_m = 5.0
+   external_conflict_resolution.selected_depot_expected_count = 10
+   external_conflict_resolution.selected_depot_wait_timeout_sec 默认 10 秒
+   external_conflict_resolution.force_emit_bundle_when_unresolved = true
+
+5. 贮备库：
+   depot.start_port = 8601
+   depot.count = 24
+   depot.per_theater_count = 12
+   depot.gateway_port = 9191
+   depot.capacity = 1
+   depot.reload_duration_sec = 60
+
+如果要整体更改贮备库端口，优先改 deployment 配置里的 depot.start_port、depot.count、depot.per_theater_count、depot.gateway_port，然后重新运行 prepare 生成配置。不要只改单个脚本或单个 app，否则 gateway、贮备库进程、message_capture 和模型端口映射容易不一致。
+
+配置速查表：
+
+1. 总入口配置
+   配置文件：
+      configs/deployment_topology.local_192.json
+   生效方式：
+      修改后运行 prepare，由 scripts/apply_deployment_config.py 和 scripts/generate_depot_configs.py 重新生成 result/configs 下的调度、车辆、贮备库、gateway 配置。
+   命令：
+      bash scripts/run_three_platform_flow.sh prepare --deployment-config configs/deployment_topology.local_192.json
+
+2. message_capture 开关
+   配置位置：
+      configs/deployment_topology.local_192.json -> message_capture.enabled
+   当前值：
+      true
+   影响：
+      true 时，调度、车辆、贮备库、贮备库 gateway 都会把收发消息写入 result/message_capture。
+      false 时，不保存收发消息文件，但事件日志仍可能继续写 logs。
+   代码读取位置：
+      scripts/apply_deployment_config.py
+      scripts/generate_depot_configs.py
+      mvs/scheduler/scheduler_app.py
+      mvs/vehicle/vehicle_app.py
+      mvs/depot/depot_app.py
+      mvs/depot/depot_gateway.py
+
+3. 车辆数量和端口
+   配置位置：
+      configs/deployment_topology.local_192.json -> vehicles
+   当前关键值：
+      gateway_port = 9190
+      vehicle_start_port = 8414
+      vehicle_count = 64
+      enable_extended_128 = true
+      extended_vehicle_start_port = 8519
+      extended_vehicle_count = 64
+   影响：
+      gateway_port 是车辆 gateway 对外接收评分请求的端口。
+      enable_extended_128=true 时，会生成 8414-8477 和 8519-8582 两批车辆。
+   代码读取位置：
+      scripts/apply_deployment_config.py
+      mvs/vehicle/vehicle_gateway.py
+      scripts/run_three_platform_flow.sh
+
+4. 车辆规划候选数量
+   配置位置：
+      单车配置里的 planning 字段，通常由 prepare 生成到 result/configs/vehicles/<vehicle_id>.json。
+      如果 deployment 中没有显式写 planning，则使用 mvs/vehicle/vehicle_app.py 里的代码默认值。
+   代码默认值：
+      max_hide_candidates = 2
+      max_depot_candidates = 1
+      max_candidate_path_options = 30
+      trajectory_sample_sec = 10.0
+      candidate_fire_time_grace_sec = 15.0
+      candidate_fire_time_early_grace_sec = 60.0
+   影响：
+      max_hide_candidates 控制每个发射点最多尝试多少个隐蔽点。
+      max_depot_candidates 控制每条候选路径最多保留多少个贮备库后续候选。
+      max_candidate_path_options 控制每辆车 VEHICLE_CANDIDATE_PATH_RESULT 最多返回多少条候选路径。
+      trajectory_sample_sec 控制 path_points 采样间隔，数值越大 JSON 越小，但轨迹越稀疏。
+   代码读取位置：
+      mvs/vehicle/vehicle_app.py 初始化 planning_cfg。
+
+5. 车辆速度
+   配置位置：
+      configs/deployment_topology.local_192.json -> vehicle_tuning.speed_mps
+   当前值：
+      22.222
+   含义：
+      约 80 km/h。
+   影响：
+      当前车辆规划和时间估计按这个配置速度走，不再按道路类型限速表压低速度。
+   代码读取位置：
+      scripts/apply_deployment_config.py
+      mvs/vehicle/vehicle_app.py
+      mvs/common/scoring.py
+
+6. 神经网络 ETA 模型
+   配置位置：
+      单车配置里的 time_predict_model_path。
+   当前默认：
+      空字符串。
+   影响：
+      如果为空或文件不存在，MLPTimePredictor 使用 distance/speed*fallback_bias。
+      如果指向 JSON 模型文件，则真实执行 MLP 前向推理，network_predict_count 会增加。
+   代码读取位置：
+      mvs/vehicle/vehicle_app.py
+      mvs/vehicle/time_predictor.py
+
+7. 调度端冲突距离和等待策略
+   配置位置：
+      configs/deployment_topology.local_192.json -> external_conflict_resolution
+   当前关键值：
+      distance_m = 5.0
+      selected_depot_expected_count = 10
+      force_emit_bundle_when_unresolved = true
+   代码默认值：
+      selected_depot_expected_count 默认 10
+      selected_depot_wait_timeout_sec 默认 10.0
+      hide_capacity 默认 1
+      delay_step_sec 默认 5.0
+      max_delay_sec 默认 900.0
+      post_fire_max_delay_sec 默认 7200.0
+      component_repair_max_options_per_vehicle 默认 6
+   影响：
+      distance_m 是车辆路径空间冲突阈值。
+      selected_depot_expected_count 是调度固定等待的选库结果数量，当前就是默认接收 10 个贮备库选择结果。
+      selected_depot_wait_timeout_sec 是收到选车结果后，最多再等选库结果的秒数。
+      component_repair_max_options_per_vehicle 是局部冲突修复第一层候选展开数量。
+   代码读取位置：
+      mvs/scheduler/scheduler_app.py 初始化 external_conflict_cfg。
+
+8. 贮备库进程和 gateway
+   配置位置：
+      configs/deployment_topology.local_192.json -> depot
+   当前关键值：
+      count = 24
+      start_port = 8601
+      per_theater_count = 12
+      gateway_port = 9191
+      capacity = 1
+      reload_duration_sec = 60.0
+   影响：
+      start_port/count 决定生成哪些贮备库进程。
+      gateway_port 决定 REQUEST_DEPOT_SCORE 发到哪里。
+      capacity 决定单个贮备库同一时间能服务几辆车，当前默认 1。
+      reload_duration_sec 决定每辆车补充耗时，当前 60 秒。
+      per_theater_count 决定按区域分组时每组多少个贮备库，当前 12 个。
+   生成位置：
+      result/configs/depots/<depot_id>.json
+      result/configs/depot_gateway.json
+   代码读取位置：
+      scripts/generate_depot_configs.py
+      mvs/depot/depot_app.py
+      mvs/depot/depot_gateway.py
+      mvs/scheduler/scheduler_app.py
+
+9. 模型地址
+   配置位置：
+      configs/deployment_topology.local_192.json -> model
+   当前关键值：
+      host = 192.168.2.10
+      port = 8888
+      callback_host = 192.168.2.10
+      callback_port = 8888
+      prelaunch_only = true
+   影响：
+      调度、车辆 gateway、贮备库 gateway 都会把对应消息转发到模型地址。
+      prelaunch_only=true 时，模型侧重点是射前选车和评分，射后贮备库路径由车辆候选和调度消解决定。
+
+10. 调度端口和区域
+   配置位置：
+      configs/deployment_topology.local_192.json -> schedulers.platforms
+   当前关键值：
+      scheduler_001 listen_port = 9120, theater_id = henan, model_message_type_tag = 26D
+      scheduler_002 listen_port = 9121, theater_id = guangdong, model_message_type_tag = 27
+   影响：
+      两个调度分别负责两个区域/分组的数据和结果。
+
+
+四、完整消息推进格式
+
+1. 调度向模型请求点位
+   消息类型：REQUEST_DIAN
+   发送位置：调度 message_capture send
+   作用：请求模型返回发射点、隐蔽点、车辆点、贮备库点等上下文。
+
+2. 模型向调度返回点位
+   常见消息类型：
+   - FA_SHE_DIAN：发射点
+   - YIN_BI_DIAN：隐蔽点
+   - VEHICLE_DIAN：车辆位置点
+   - ZHU_BEI_DIAN：贮备库点
+
+   调度收到后会进行解析、投影到路网、建立 special points，并记录：
+   - dian_context_received
+   - vehicle_dian_row_applied
+   - vehicle_candidate_launch_points_vehicle
+   - vehicle_scoring_context_waiting_dian
+   - depot_dian_context_received
+
+3. 调度向模型发送时间倒排上下文
+   消息类型：TIME_BACKPLAN_CONTEXT
+   作用：告诉模型任务时间、发射时间、准备时间、冷热待机时间等关键时序。车辆规划时也依赖该上下文判断何时到达隐蔽点、何时离开发射、何时发射。
+
+4. 调度向模型发送车辆候选上下文
+   消息类型：VEHICLE_CANDIDATE_CONTEXT
+   作用：每辆车携带若干候选发射点，每个发射点携带两个候选隐蔽点和若干候选贮备库。
+
+   当前调度侧候选逻辑：
+   - 每个车辆默认取若干候选发射点。
+   - rank1 发射点采用全局唯一逻辑，减少多个车辆一开始就争抢同一个发射点。
+   - 每个发射点配两个隐蔽点，隐蔽点 rank1 也采用全局唯一逻辑，减少一开始就把所有车挤到同一个隐蔽点。
+   - 贮备库候选由调度生成，车辆只负责接收和规划，不负责决定候选库集合。
+
+5. 车辆收到上下文后返回车辆评分
+   消息类型：VEHICLE_SCORE_RESULT
+   作用：车辆根据自己位置、候选发射点、任务时序等计算评分，返回模型。
+
+6. 车辆收到完整上下文后返回候选路径
+   消息类型：VEHICLE_CANDIDATE_PATH_RESULT
+   作用：车辆只应在收到必要上下文后规划并发送一次候选路径结果。路径里包含多个候选发射点/隐蔽点组合，每条候选可附带 depot_candidates。
+
+   当前单车候选路径字段主要包括：
+   - vehicle_id
+   - task_id
+   - paths
+   - rank
+   - launch_node
+   - fire_point_id
+   - hide_point
+   - hide_selected
+   - timing_strategy
+   - wait_start_time
+   - wait_end_time
+   - wait_seconds
+   - fire_time_error_sec
+   - route_distance_m
+   - travel_seconds
+   - score_total
+   - feasible
+   - path_points
+   - depot_candidates
+
+7. 模型向调度返回选车结果
+   消息类型通常为 SELECTED_VEHICLE_RESULT
+   作用：模型告诉调度最终选中了哪些车辆/子任务。调度会固定等待选车结果达到任务期望数量，例如每个区域 48 或 40，具体由任务和配置决定。
+
+8. 模型向调度返回选库结果
+   建议消息类型：SELECTED_DEPOT_RESULT
+   作用：模型只决定整个系统选用哪些贮备库，不给每辆车分配具体贮备库。
+
+   调度收到后会构建 selected_depot_pool。后续每辆车只在自己候选路径的 depot_candidates 中选择与 selected_depot_pool 匹配的库。如果车辆候选里没有被选中的库，则该车最终路径不带贮备库后续路段。
+
+9. 调度统一冲突消解
+   触发条件：
+   - 已收到选车结果。
+   - 已收到被选车辆的 VEHICLE_CANDIDATE_PATH_RESULT。
+   - 若路径里存在 depot_candidates，则等待 selected_depot_expected_count 个选库结果；如果选车后 10 秒仍未收到足够选库结果，则按无贮备库后续路径处理，不阻塞最终轨迹。
+
+10. 调度向模型/服务器返回最终轨迹
+   消息类型：DISPATCH_TRAJECTORY_BUNDLE
+   作用：包含冲突消解后的最终车辆轨迹集合。若贮备库条件满足，轨迹包含射前路段、发射点驻留、射后到贮备库、补充等待、返回起点。若选库结果缺失或车辆候选库不匹配，最终轨迹只包含射前部分。
+
+
+五、任务书公式到代码的映射
+
+公式(1)：发射点/任务点多目标代价
+公式形式：f(X)=w1*f_d(X)+w2*f_p(X)-w3*f_n(X,R)
+代码位置：
+   mvs/common/formula_utils.py: launch_point_cost
+   mvs/common/scoring.py: score_launch_point_for_vehicle
+当前作用：
+   用距离车辆、距离隐蔽点、贮备库支撑分数计算发射点代价。score_launch_point_for_vehicle 会输出 formula_launch_point_cost 和公式语义字段，便于追溯。
+讲解口径：
+   我们把发射点优选分成距离、时序、隐蔽支撑、任务优先级、冗余路线几个维度；任务书公式中的代价函数作为其中一条可追踪公式落地。
+
+公式(2)：路线时间窗冲突
+公式形式：C=max(0,min(end_i,end_j)-max(start_i,start_j))
+代码位置：
+   mvs/common/formula_utils.py: time_window_overlap, has_route_time_conflict
+   mvs/scheduler/scheduler_app.py: _external_hide_wait_conflict_detail, _external_path_conflict_detail, _audit_external_dispatch_entries
+当前作用：
+   用于判断两个车辆是否在同一隐蔽点等待时间窗重叠，或路径空间时间采样是否冲突。
+讲解口径：
+   冲突消解不是只看静态路线是否相交，而是看时间窗和空间距离同时满足的时空冲突。
+
+公式(3)：发射点容量冲突
+公式形式：Delta G = N - G
+代码位置：
+   mvs/common/formula_utils.py: launch_point_capacity_delta
+   mvs/scheduler/scheduler_app.py: 候选发射点 rank1 全局唯一、最终审计 launch uniqueness
+当前作用：
+   当前发射点按唯一占用处理，工程上等价于容量为 1 的强约束。若后续某类发射点允许多车共用，可以直接把 capacity 引入该公式。
+讲解口径：
+   当前实现比普通容量公式更严格，先按唯一发射点保证不重复发射点占用。
+
+公式(4)：隐蔽点容量冲突
+公式形式：Delta C = N - C
+代码位置：
+   mvs/common/formula_utils.py: hide_point_capacity_delta
+   mvs/scheduler/scheduler_app.py: _external_hide_wait_conflict_detail
+当前作用：
+   当多车在同一隐蔽点等待时间窗重叠时，按隐蔽点 capacity 检查是否超载。
+讲解口径：
+   隐蔽点不是简单禁止重复使用，而是在容量和时间窗允许的情况下可以共用。
+
+公式(5)：车辆优先级
+公式形式：P(i)=eta1/(deadline-current)+eta2*type(i)+eta3/d(i,target)
+代码位置：
+   mvs/common/formula_utils.py: vehicle_priority
+   mvs/common/scoring.py: compute_dispatch_priority
+   mvs/scheduler/scheduler_app.py: _build_vehicle_candidate_launch_points 中写入 dispatch_priority_breakdown
+当前作用：
+   用于把车辆距离、时间紧迫度、车辆类型权重整理成可解释优先级。当前主要作为候选上下文中的解释字段和后续扩展排序依据。
+讲解口径：
+   模型看到的不只是候选点，还带有车辆与任务之间的优先级解释量。
+
+公式(6)：贮备库补充位冲突
+公式形式：Delta B = N - B
+代码位置：
+   mvs/common/formula_utils.py: depot_slot_delta
+   mvs/scheduler/scheduler_app.py: _audit_external_dispatch_entries, _depot_queue_wait_for_path, _resolve_selected_depot_suffixes
+当前作用：
+   贮备库 capacity 默认 1。多个车辆选择同一贮备库时，调度不会随机丢弃，而是按到达顺序排队，给后到车辆增加等待时间，最终再做射后路径冲突检查。
+讲解口径：
+   模型选的是系统使用的贮备库集合，调度再基于车辆候选库和容量约束自动排队消解。
+
+公式(7)：车辆和贮备库资源类型适配
+公式形式：资源类型不同为 1，相同为 0
+代码位置：
+   mvs/common/formula_utils.py: vehicle_depot_type_mismatch
+   mvs/common/scoring.py: DepotScorer.score_depots 中 resource_ok/score_resource
+当前作用：
+   当前数据如果提供 ammo_type 和 supported_ammo_types，则直接进入 score_resource；如果未提供，默认认为资源不限制，避免因为缺字段导致路径被误杀。
+讲解口径：
+   资源适配接口已经有，当前按数据完备程度启用，不会因为任务书字段缺失影响主流程。
+
+公式(8)-(11)：神经网络 ETA 时间预测
+任务书含义：
+   把路径拆成栅格/路段，输入长度、曲率、坡度、允许速度、进入速度、加速度等特征，由神经网络预测离开速度，再累计耗时。
+代码位置：
+   mvs/common/formula_utils.py:
+      GridFeature
+      road_curvature
+      road_grade
+      grid_delta_time
+      estimate_eta_by_grid_model
+   mvs/vehicle/time_predictor.py:
+      MLPTimePredictor
+   mvs/vehicle/vehicle_app.py:
+      初始化 time_predictor
+      _travel_time_seconds
+      _build_lane_route_trajectory 中的 route_predict_sec 计算
+当前作用：
+   time_predictor 支持 JSON 格式 MLP。配置 time_predict_model_path 后，会真实执行网络前向推理，并记录 network_predict_count。没有模型时使用 fallback，不影响原流程。
+讲解口径：
+   任务书中的“神经网络预测时间”已经以轻量推理引擎形式实现。为了适配离线 openEuler，推理不依赖 PyTorch，模型文件可以用 JSON 权重部署。
+
+公式(12)：拓扑路径搜索综合代价
+公式形式：综合爬坡、距离、地标、曲率等代价
+代码位置：
+   mvs/common/formula_utils.py: topology_total_cost
+   mvs/vehicle/path_constraints.py, mvs/vehicle/hybrid_astar.py, mvs/scheduler/map_model.py 中有路线代价和路网路由基础
+当前作用：
+   公式函数已经实现为通用代价接口。当前主路由仍以 LaneGraph.route_between_nodes 和车辆约束规划为主，后续可以把更多地形/坡度/地标代价接入。
+讲解口径：
+   我们已保留拓扑综合代价接口，当前优先保证路网可达性、时间可达性和冲突消解。
+
+公式(13)：A* 邻居生成/动作扩展
+代码位置：
+   mvs/common/formula_utils.py: generate_neighbors
+   mvs/vehicle/hybrid_astar.py: 车辆运动学动作扩展和代价搜索
+当前作用：
+   通用邻居函数已实现，实际车辆详细规划由 hybrid_astar/path_constraints 承接。
+讲解口径：
+   任务书中的搜索扩展思想已经体现在车辆路径规划器中。
+
+公式(14)：隐蔽点搜索范围
+代码位置：
+   mvs/common/formula_utils.py: hide_search_distance_before, hide_search_distance_after
+   mvs/scheduler/scheduler_app.py: _candidate_hide_points_for_route
+当前作用：
+   公式函数已实现；当前工程为了实际效果，隐蔽点选择主要按路线绕行比、走廊距离、距离发射点排序，并且每个发射点提供两个候选隐蔽点。
+讲解口径：
+   隐蔽点搜索既保留任务书时间/距离边界公式，也增加了工程上的路线绕行评估，避免候选点看起来近但真实路网绕路很远。
+
+公式(16)：发射平台时间评分
+代码位置：
+   mvs/common/formula_utils.py: time_score
+   mvs/common/scoring.py: score_vehicle_task_execution
+当前作用：
+   当有 timing_available_sec 时，车辆任务评分会输出 formula_time_score。
+
+公式(17)：暴露概率和安全评分
+代码位置：
+   mvs/common/formula_utils.py: exposure_probability, safe_score
+   mvs/common/scoring.py: score_vehicle_task_execution
+当前作用：
+   根据预计时间、最大可用时间、隐蔽等待时间计算安全评分 formula_safe_score。
+
+公式(18)：备选路线加权 ETA
+代码位置：
+   mvs/common/formula_utils.py: weighted_redundant_time
+当前作用：
+   已提供接口。当前车辆候选路径会生成多条 path option，冗余效果主要通过候选集合和冲突消解体现。
+
+公式(19)：路线冗余评分
+代码位置：
+   mvs/common/formula_utils.py: redundancy_score
+   mvs/common/scoring.py: score_launch_point_for_vehicle 中用 redundancy_ratio 输出 score_launch_redundancy
+当前作用：
+   候选发射点评分里有冗余路线维度。
+
+公式(20)：Sigmoid 归一化
+代码位置：
+   mvs/common/formula_utils.py: sigmoid_normalize
+   mvs/common/scoring.py: score_depot_task_execution
+当前作用：
+   贮备库时间公式归一化时使用，避免原始 log 分数不在 0-1 量纲内。
+
+公式(21)：发射平台综合评分
+代码位置：
+   mvs/common/formula_utils.py: launcher_total_score
+当前作用：
+   作为任务书发射平台综合评分接口保留。当前车辆任务执行评分采用工程权重直接输出 score_total，同时输出公式分项，便于对照。
+
+公式(22)：贮备库繁忙程度惩罚
+代码位置：
+   mvs/common/formula_utils.py: depot_busy_score
+   mvs/common/scoring.py: score_depot_task_execution
+当前作用：
+   根据 queue_count、occupied、capacity 计算贮备库繁忙惩罚。
+
+公式(23)：贮备库等待/准备时间惩罚
+代码位置：
+   mvs/common/formula_utils.py: depot_prep_score
+   mvs/common/scoring.py: score_depot_task_execution
+当前作用：
+   根据 estimated_wait_sec 计算贮备库等待/准备时间惩罚。
+
+公式(24)：最近 top_k 个平台到达贮备库平均 ETA
+代码位置：
+   mvs/common/formula_utils.py: depot_average_arrival_time
+当前作用：
+   作为贮备库时间评分基础函数。
+
+公式(25)：贮备库区位时间评分
+代码位置：
+   mvs/common/formula_utils.py: depot_time_score
+   mvs/common/scoring.py: score_depot_task_execution
+当前作用：
+   按车辆从发射点到贮备库 travel_sec_from_launch 计算区位时间评分。
+
+公式(26)：贮备库综合评分
+代码位置：
+   mvs/common/formula_utils.py: depot_total_score
+   mvs/common/scoring.py: score_depot_task_execution
+当前作用：
+   把繁忙、准备/等待、区位时间合成贮备库公式总分 formula_depot_total_score。
+
+
+六、车辆端实现细节
+
+1. 车辆启动时读取配置
+   文件：mvs/vehicle/vehicle_app.py
+   关键参数：
+   - speed_mps：车辆统一速度，当前配置约 80 km/h。
+   - max_hide_candidates：每个发射点尝试的隐蔽点数量。
+   - max_depot_candidates：每条候选路径最多保留几个贮备库后续路径。
+   - max_candidate_path_options：单车返回给模型的候选路径总数上限。
+   - trajectory_sample_sec：轨迹采样间隔，影响 JSON 大小。
+   - time_predict_model_path：神经网络时间预测模型路径。
+
+2. 车辆接收 VEHICLE_CANDIDATE_CONTEXT
+   函数：_on_vehicle_candidate_context
+   车辆保存调度发来的候选发射点、隐蔽点、贮备库候选点。
+   如果车辆已有自身位置和 TIME_BACKPLAN_CONTEXT，则开始评分和规划。
+
+3. 车辆评分
+   函数：_submit_vehicle_context_score
+   逻辑：
+   - 取该车辆候选发射点。
+   - 对每个候选发射点调用 _score_vehicle_context_launch_candidate。
+   - 评分结果里带任务书语义字段，例如 score_task_book_*。
+   - 发送 VEHICLE_SCORE_RESULT。
+
+4. 车辆候选路径规划
+   函数：_submit_candidate_paths_to_model
+   逻辑：
+   - 必须已有车辆位置、TIME_BACKPLAN_CONTEXT、VEHICLE_CANDIDATE_CONTEXT。
+   - 遍历调度分配给该车辆的候选发射点。
+   - 每个发射点尝试两个候选隐蔽点，也允许直接去发射点。
+   - 每条候选路径中先规划射前路径。
+   - 如果该发射点带有 depot_candidates，则继续规划射后贮备库路径。
+   - 最终发送一次 VEHICLE_CANDIDATE_PATH_RESULT。
+
+5. 射前路径时序
+   函数：_plan_candidate_path_option
+   主要考虑：
+   - 冷待机：在发射准备前更早到达，预留 cold_standby_sec。
+   - 热待机：如果冷待机不可行或不合适，再尝试较短等待的 hot_standby_sec。
+   - 隐蔽等待：如果选了隐蔽点，则先到隐蔽点等待，再去发射点。
+   - 发射时间误差：fire_time_error_sec 用于判断是否满足发射时间窗口。
+
+6. 射后贮备库路径
+   函数：_plan_post_fire_depot_candidates
+   触发条件：
+   - 车辆已经收到贮备库点位。
+   - 调度发来的候选发射点里包含 candidate_depots。
+   - 当前发射节点、贮备库节点、回起点节点都能在路网中解析。
+   - fire time 存在。
+
+   路径形式：
+   发射点 -> 贮备库 -> 补充等待 -> 回起点
+
+   关键字段：
+   - depot_id
+   - depot_node
+   - depot_port
+   - travel_sec_from_launch
+   - depot_arrival_time
+   - reload_end_time
+   - return_home_sec
+   - finish_time
+   - path_points
+
+7. 车辆为什么可能没有发送路径
+   常见原因：
+   - 缺 TIME_BACKPLAN_CONTEXT。
+   - 缺 VEHICLE_CANDIDATE_CONTEXT。
+   - 车辆位置没有被 VEHICLE_DIAN 或实时状态更新。
+   - 候选发射点无法映射到路网。
+   - 目标地址发送超时，日志中会出现 vehicle_context_score_send_failed 或 path result send 相关错误。
+
+
+七、调度端实现细节
+
+1. 调度收点位并投影到路网
+   文件：mvs/scheduler/scheduler_app.py
+   调度接收 FA_SHE_DIAN、YIN_BI_DIAN、VEHICLE_DIAN、ZHU_BEI_DIAN 后，把真实经纬度点投影到路网节点。后续车辆规划默认以投影点作为可达终点。
+
+2. 调度生成车辆候选上下文
+   函数：_build_vehicle_candidate_launch_points
+   当前策略：
+   - rank1 发射点全局唯一，减少模型选车后发射点重复。
+   - 每个发射点分配两个隐蔽点。
+   - rank1 隐蔽点也尽量全局唯一，减少同一批车都挤到同一个隐蔽点。
+   - 每个发射点附带若干 candidate_depots，贮备库候选由调度决定，车辆只接收和规划。
+
+3. 调度发送上下文
+   函数：_send_vehicle_scoring_context_to_model
+   发送：
+   - TIME_BACKPLAN_CONTEXT
+   - VEHICLE_CANDIDATE_CONTEXT
+
+   发送前会检查点位是否齐全。之前根据要求做过调整：调度端会等收到贮备库点位后再生成评分上下文；如果测试中没有贮备库点位，则不强行等待贮备库点位，以避免阻塞纯射前流程。
+
+4. 调度接收选车结果
+   函数：_on_selected_vehicle_result 以及外部调度相关逻辑
+   作用：
+   - 保存模型选择的车辆和子任务。
+   - 固定等待任务需要的选车数量。
+   - 当前 128 车两区域场景中，每个区域按任务要求选 40 或 48，最终一共 80 或 96 取决于本次任务配置和模型结果。
+
+5. 调度接收选库结果
+   函数：_on_selected_depot_result
+   作用：
+   - 支持 depot_id、depot_node、depot_port、name 等别名识别。
+   - 构建 selected_depot_pool。
+   - 配置 selected_depot_expected_count = 10 时，调度固定等待 10 个选库结果。
+
+   当前设计：
+   模型只决定系统选用哪些贮备库，不给每辆车分配某个贮备库。调度在车辆候选 depot_candidates 中找与 selected_depot_pool 匹配的库，再按耗时、容量和冲突情况选择。
+
+6. 调度等待逻辑
+   函数：_try_resolve_external_dispatch_for_task
+   触发时机：
+   - 选车结果数量够。
+   - 被选车辆候选路径都已收到。
+   - 如果候选路径中有贮备库候选，则等待选库结果。
+
+   选库等待策略：
+   - selected_depot_expected_count 默认 10。
+   - 选车结果收到后等待 selected_depot_wait_timeout_sec，默认 10 秒。
+   - 超时仍没有足够选库结果，则最终轨迹不带贮备库后续路径，先保证射前调度能返回。
+
+7. 调度冲突消解顺序
+   当前正确顺序：
+   - 先对射前路径做无冲突消解。
+   - 射前路径已经无冲突之后，再接入射后贮备库路径。
+   - 如果车辆候选中的贮备库没有被模型选中，该车辆就不带贮备库后续路径。
+   - 如果多个车辆选择同一个被选贮备库，调度按贮备库容量排队等待。
+
+8. 射前冲突类型
+   - 发射点重复冲突。
+   - 隐蔽点时间窗容量冲突。
+   - 路径空间时间冲突。
+   - 发射时间误差过大。
+
+9. 射后冲突类型
+   - 贮备库容量冲突。
+   - 贮备库服务时间窗冲突。
+   - 射后路径空间时间冲突。
+
+10. 冲突消解方法
+   主函数：_try_resolve_external_dispatch_for_task
+   核心动作：
+   - 按模型选择车辆顺序构建候选路径集合。
+   - 每辆车优先使用与分配发射点匹配的候选路径。
+   - 如果发生冲突，尝试候选路径替换。
+   - 如果替换不够，尝试延迟隐蔽等待之前的路径段。
+   - 如果局部车辆相互卡住，启用 component repair。
+   - 最后做最终审计，确保输出集合无冲突。
+
+11. 二区冲突消解耗时优化
+   函数：_try_external_conflict_component_repair
+   当前优化：
+   - 对冲突车辆构建局部冲突分量。
+   - 候选组合不一次性全部展开，而是分层尝试。
+   - 第一层尝试前 6 个候选，第二层 12 个，最后才全部候选。
+   - 如果前面层级已经找到解，就不会继续枚举大量组合。
+
+   这个优化不是特例，不绑定某几个车号，而是针对“局部强冲突、候选组合爆炸”的通用保底规则。
+
+12. 固定后缀剪枝
+   日志字段：fixed_suffix_pruned
+   作用：
+   如果某个冲突发生在等待之后的固定后缀上，而当前延迟动作只影响等待之前的路段，则这类延迟不可能解决冲突，直接剪枝，减少无效尝试。
+
+13. 发射点驻留修复
+   函数：_path_with_selected_depot
+   关键点：
+   射前路径最后一个点是发射点，射后路径第一个点也是发射点。即使经纬度相同但时间不同，也必须保留两个点，这样车辆在发射前后这段时间表现为停在发射点，而不是被线性插值成还在移动。
+
+
+八、贮备库链路实现细节
+
+1. 贮备库 gateway
+   文件：mvs/depot/depot_gateway.py
+   监听端口：默认 9191
+   接收消息：REQUEST_DEPOT_SCORE
+   返回 ACK：REQUEST_DEPOT_ACCEPTED
+   转发对象：模型地址 model_host:model_port
+
+   典型日志：
+   - depot_gateway_started
+   - depot_gateway_request_received
+   - depot_gateway_request_forwarded
+   - depot_gateway_request_accepted
+
+2. 贮备库 app
+   文件：mvs/depot/depot_app.py
+   接收消息：
+   - REQUEST_DEPOT_SCORE
+   - DEPOT_CONTEXT
+   - ZHU_BEI_CONTEXT
+   - DEPOT_ASSIGN_REQUEST
+   - 点位上下文消息
+
+   如果收到不支持的消息类型，会记录 depot_message_ignored，并写出 reason = unsupported_msg_type。
+   这说明网络链路通了，但是消息类型不在贮备库 app 当前可处理集合内。
+
+3. 贮备库评分结果
+   函数：_on_score_request, _score_from_payload, _build_task_book_depot_result
+   输出消息：DEPOT_SCORE_RESPONSE
+   其中包含：
+   - depot_score_result
+   - task_book_depot_score_result
+
+4. 贮备库点位格式
+   当前可以识别类似：
+   {
+     "side": "红方",
+     "alt": "0.000",
+     "name": "前置贮备库_7",
+     "index": "296",
+     "lon": "114.45271643",
+     "type": "DF_FRONT_STORAGE",
+     "vehicle_id": "8608",
+     "lat": "31.74442349"
+   }
+
+   识别逻辑：
+   - vehicle_id 可作为 depot_port 或 depot_id 的来源。
+   - name 可作为展示名。
+   - lon/lat 用于投影到路网。
+   - type 用于区分贮备库点。
+
+5. 为什么车辆能辨认选车结果，贮备库也需要别名
+   车辆选择结果通常直接带 vehicle_id/subtask_id，车辆端口和车辆 ID 本身就是一一对应的。
+   贮备库点位来自模型或点位文件时，可能有 depot_id、depot_node、depot_port、name、index、vehicle_id 等多种称呼。调度端必须做 canonical alias，把这些都映射到同一个真实贮备库。
+
+
+九、神经网络时间预测如何讲
+
+1. 任务书要求
+   - 使用神经网络进行道路栅格/路段耗时预测。
+   - 输入可以包括路段长度、曲率、坡度、允许速度、进入速度、最大加速度。
+   - 输出可以是离开速度或耗时修正因子。
+   - 车辆路径总耗时由各路段累加得到。
+
+2. 当前实现
+   文件：mvs/vehicle/time_predictor.py
+   类：MLPTimePredictor
+
+   支持两种输出：
+   - output_type = exit_speed_mps：网络输出离开速度，再用 2L/(Vin+Vout) 计算路段耗时。
+   - 其他情况：网络输出时间修正因子，对 distance/speed 的 baseline 进行修正。
+
+3. 离线部署优势
+   - 不依赖 PyTorch/TensorFlow。
+   - 模型是 JSON 权重文件。
+   - openEuler 离线服务器只需要 Python 标准库即可运行推理。
+
+4. 如何证明真的用了网络
+   - 配置 time_predict_model_path 指向存在的 JSON 模型文件。
+   - 启动日志会显示 time_predictor_ready，model_summary 中 network_enabled = true。
+   - 运行后检查 network_predict_count 是否增加。
+
+5. 如果没有模型文件
+   - network_enabled = false。
+   - 使用 distance / speed * fallback_bias。
+   - 这是工程 fallback，不能对外说该次运行真实使用了神经网络。
+
+
+十、JSON 过大问题和当前控制手段
+
+1. 判断 JSON 大小不是看行数，而是看序列化后的字节数。
+   Python 通信通常是 json.dumps 后按 UTF-8 bytes 加换行发送。VS Code 不高亮或同事说“不算 JSON”，常见原因是文件太大、显示器/编辑器语言服务超限，或捕获文件中混入非 JSON 内容。
+
+2. 当前控制手段：
+   - trajectory_sample_sec：控制 path_points 采样间隔，越大点越少，JSON 越小。
+   - max_candidate_path_options：控制单车候选路径数量。
+   - max_depot_candidates：控制每条候选路径携带几个贮备库后续候选。
+   - 每个发射点两个隐蔽点，减少组合爆炸。
+
+3. 不建议随意删除 path_points 字段。
+   因为调度冲突消解需要真实时空轨迹，不能只传起终点。
+
+4. 后续更稳的方案：
+   - summary + cache：车辆只传候选摘要，完整 path_points 本地缓存，调度按 ID 读取。
+   - chunked protocol：超大路径分块传输。
+   - gzip/base64 或压缩二进制：保留点位 schema，但减小传输体积。
+
+
+十一、常用运行命令
+
+1. 清理和重新生成配置
+   bash scripts/run_three_platform_flow.sh prepare --deployment-config configs/deployment_topology.local_192.json
+
+2. 启动调度
+   bash scripts/run_three_platform_flow.sh scheduler --deployment-config configs/deployment_topology.local_192.json
+
+3. 启动车辆
+   bash scripts/run_three_platform_flow.sh vehicles --deployment-config configs/deployment_topology.local_192.json
+
+4. 启动贮备库
+   bash scripts/run_three_platform_flow.sh depot --deployment-config configs/deployment_topology.local_192.json
+
+5. 模拟车辆评分请求
+     bash scripts/send_vehicle_score_requests_mapped.sh 192.168.2.8 9190 0.1 \
+     8414-8430=192.168.2.12 \
+     8431-8477=192.168.2.14 \
+     8519-8582=192.168.2.15
+
+6. 模拟贮备库评分请求
+   bash scripts/send_depot_score_requests_mapped.sh 192.168.2.8 9191 0.1 \
+     8601-8612=192.168.2.8 \
+     8613-8624=192.168.2.8
+
+7. 回放调度冲突消解
+   python3 scripts/replay_conflict_resolution.py \
+     --scheduler-config result/configs/schedulers/scheduler_002.json \
+     --event-log logs/scheduler_002_events.jsonl \
+     --task-id task_10_3700 \
+     --out-dir result/conflict_replay_tiered_component_repair \
+     --render
+
+8. 生成轨迹动画播放器
+   python3 scripts/build_trajectory_player.py \
+     --replay-dir result/conflict_replay_tiered_component_repair \
+     --out result/visuals/final_trajectory_player_tiered_component_repair.html
+
+9. 公式单元测试
+   python3 -m pytest tests/test_formula_utils.py tests/test_time_predictor.py
+
+
+十二、message_capture 和日志怎么看
+
+1. 调度 message_capture
+   result/message_capture/scheduler/scheduler_001/send
+   result/message_capture/scheduler/scheduler_001/recv
+   result/message_capture/scheduler/scheduler_002/send
+   result/message_capture/scheduler/scheduler_002/recv
+
+2. 车辆 message_capture
+   result/message_capture/vehicle/<vehicle_id>/send
+   result/message_capture/vehicle/<vehicle_id>/recv
+
+3. 贮备库 message_capture
+   result/message_capture/depot/<depot_id>/send
+   result/message_capture/depot/<depot_id>/recv
+
+4. 贮备库 gateway message_capture
+   result/message_capture/depot_gateway/send
+   result/message_capture/depot_gateway/recv
+
+5. 事件日志
+   logs/scheduler_001_events.jsonl
+   logs/scheduler_002_events.jsonl
+   logs/<vehicle_id>_events.jsonl
+   logs/depot_gateway_events.jsonl
+   logs/<depot_id>_events.jsonl
+
+6. timing 日志
+   logs/scheduler_001_timing.jsonl
+   logs/scheduler_002_timing.jsonl
+   logs/<vehicle_id>_timing.jsonl
+
+
+十三、当前实现可以对甲方强调的点
+
+1. 不是单车独立规划后简单拼接。
+   车辆端先生成候选路径，调度端再统一做全局冲突消解，最终输出的是经过发射点、隐蔽点、路网空间时间、贮备库容量多重审计后的轨迹集合。
+
+2. 贮备库不是车辆自己拍脑袋选择。
+   候选贮备库由调度生成，模型只选择系统启用的贮备库集合，调度再把车辆候选路径和选库结果匹配，并处理排队和冲突。
+
+3. 射前和射后分阶段消解。
+   先保证所有车辆射前无冲突到达发射点，再考虑射后贮备库补充与返回起点。这样不会因为射后规划失败破坏射前任务。
+
+4. 任务书公式有集中实现。
+   公式集中在 formula_utils.py，业务评分集中在 scoring.py，便于审查、测试和后续替换权重。
+
+5. 神经网络 ETA 有工程实现路径。
+   当前不是写死必须在线安装深度学习库，而是用 JSON MLP 离线推理。能满足离线服务器部署，并可替换真实训练权重。
+
+6. 速度逻辑已经统一。
+   当前按 80 km/h 配置速度估计，不再受道路类型速度表影响。后续神经网络 ETA 接入后，速度/耗时由网络修正。
+
+7. 冲突消解有保底优化。
+   对局部高冲突场景，调度使用分层 component repair，先尝试少量候选，必要时扩大搜索，避免每次都在二区高冲突场景耗费多秒。
+
+8. 最终结果可视化。
+   可以用 build_trajectory_player.py 生成 HTML 动画，支持完整路网、特殊点位、车辆随时间移动、50 倍速播放和进度条拖动。
+
+
+十四、当前需要如实说明的边界
+
+1. 神经网络模型文件如果未配置，实际运行是 fallback。
+   对甲方讲“已支持神经网络 ETA 接口和离线推理”，但只有配置了真实 JSON 模型并出现 network_enabled=true 时，才能说本次测试真实调用了神经网络。
+
+2. 资源适配依赖数据字段。
+   如果贮备库没有 supported_ammo_types、车辆没有 ammo_type，则系统默认资源可用，不会因为缺字段误判失败。
+
+3. 投影点仍是路网可达点。
+   车辆最终到达投影后的路网节点，而不是强行到真实经纬度点。这样能保证路径在路网上可走。当前已经做过投影误差检查和可视化，超过阈值的点位需要结合地图数据继续检查。
+
+4. 如果模型没有返回选库结果，最终轨迹不会强行带贮备库。
+   调度会等待 10 秒，超时后只返回射前无冲突路径。这是为了保证主任务不被选库链路阻塞。
+
+5. 如果车辆候选贮备库不在模型选中的库集合中，该车辆不带贮备库后续路径。
+   这是当前最合理逻辑：模型决定系统用哪些库，调度不能把车强行派到未选中的库。
+
+6. 大 JSON 仍可能需要通信协议优化。
+   当前通过采样和候选数量控制大小。如果现场仍有传输或解析限制，应优先做 summary+cache 或 chunked protocol。
+
+
+十五、讲解时的一条主线
+
+可以这样讲：
+
+系统先由调度端接收任务和点位，把发射点、隐蔽点、车辆位置、贮备库全部映射到路网。调度根据任务书公式和工程评分，为每辆车构造候选发射点、候选隐蔽点和候选贮备库，并把 TIME_BACKPLAN_CONTEXT 与 VEHICLE_CANDIDATE_CONTEXT 发给模型和车辆。车辆端收到完整上下文后进行单车路径规划，生成多条候选路径；如果候选中包含贮备库，就同时生成发射后到贮备库补充并返回起点的路径。模型返回选车结果和系统选库结果后，调度端先对射前路径做全局无冲突消解，确保发射点、隐蔽点、路网时空都不冲突；然后再把被模型选中的贮备库后续路段接上，并处理容量排队和射后路径冲突。最终输出 DISPATCH_TRAJECTORY_BUNDLE，里面每条轨迹都经过最终审计，可以保存、画图或做动画播放。

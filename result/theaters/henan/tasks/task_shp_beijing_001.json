@@ -1,0 +1,39 @@
+{
+  "task_id": "task_shp_beijing_001",
+  "created_at": "2026-08-15T01:36:15.417845+00:00",
+  "dispatch_time": null,
+  "launches": [
+    {
+      "ammo_type": "HE",
+      "fire_after_sec": 35
+    },
+    {
+      "ammo_type": "AP",
+      "fire_after_sec": 47
+    },
+    {
+      "ammo_type": "SMOKE",
+      "fire_after_sec": 59
+    },
+    {
+      "ammo_type": "HE",
+      "fire_after_sec": 71
+    },
+    {
+      "ammo_type": "AP",
+      "fire_after_sec": 83
+    },
+    {
+      "ammo_type": "SMOKE",
+      "fire_after_sec": 95
+    },
+    {
+      "ammo_type": "HE",
+      "fire_after_sec": 107
+    },
+    {
+      "ammo_type": "AP",
+      "fire_after_sec": 119
+    }
+  ]
+}

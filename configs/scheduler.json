@@ -1,0 +1,150 @@
+{
+  "node_id": "scheduler",
+  "listen_host": "0.0.0.0",
+  "listen_port": 9000,
+  "dashboard_host": "0.0.0.0",
+  "dashboard_port": 18080,
+  "lane_graph_cache_limit": 65536,
+  "lane_graph_prewarm": {
+    "enabled": false,
+    "mode": "background",
+    "include_hide_points": false,
+    "include_return_home": false,
+    "max_pairs": 2000,
+    "stop_on_work": true
+  },
+  "tick_sec": 0.5,
+  "heartbeat_timeout_sec": 5.0,
+  "proposal_timeout_sec": 4.0,
+  "max_proposal_retries": 2,
+  "reservation_slot_sec": 1,
+  "reservation_delay_step_sec": 2.0,
+  "reservation_max_delay_sec": 180.0,
+  "reservation_retention_sec": 30.0,
+  "reservation_deadlock_backoff_sec": 5.0,
+  "redundancy": {
+    "enabled": false,
+    "ratio": 0.0
+  },
+  "allowed_ammo_types": [
+    "HE",
+    "AP",
+    "SMOKE"
+  ],
+  "max_task_launches": 256,
+  "reject_past_fire_time": false,
+  "past_time_grace_sec": 30.0,
+  "map": {
+    "graph_json": "data/road_graph.json",
+    "points_json": "data/special_points.json",
+    "xodr_path": "",
+    "source_type": "graph_json",
+    "shp_path": "",
+    "shp_points_path": "",
+    "default_lane_width_m": 8.0,
+    "default_speed_limit_mps": 8.0
+  },
+  "assignment_scoring": {
+    "max_route_candidates": 8,
+    "max_route_candidates_real": 8,
+    "max_route_candidates_reserved": 8,
+    "max_route_candidates_redundant": 4,
+    "max_lateness_sec": 5.0,
+    "fire_window_grace_sec": 15.0,
+    "fire_window_grace_after_resets": 2,
+  "to_fire_local_deadlock_retries": 0,
+  "to_fire_local_deadlock_backoff_sec": 0.0,
+    "to_fire_deadlock_bypass_after_resets": 0,
+    "max_assignment_resets": 8,
+    "max_no_candidate_ticks": 32
+  },
+  "launch_capability": {},
+  "vehicles": [
+    {
+      "vehicle_id": "vehicle_001",
+      "host": "127.0.0.1",
+      "port": 10001,
+      "home_node": "n1",
+      "ammo_types": [
+        "HE",
+        "SMOKE",
+        "AP"
+      ],
+      "speed_mps": 8.0,
+      "kinematics": {
+        "width_m": 2.8,
+        "length_m": 7.6,
+        "wheelbase_m": 4.3,
+        "min_turn_radius_m": 12.0,
+        "max_turn_angle_deg": 105.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.0,
+        "max_edge_curvature": 0.08333,
+        "max_speed_mps": 8.0
+      }
+    },
+    {
+      "vehicle_id": "vehicle_002",
+      "host": "127.0.0.1",
+      "port": 10002,
+      "home_node": "n2",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 8.5,
+      "kinematics": {
+        "width_m": 2.9,
+        "length_m": 7.5,
+        "wheelbase_m": 4.25,
+        "min_turn_radius_m": 12.5,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.0,
+        "max_edge_curvature": 0.08,
+        "max_speed_mps": 8.5
+      }
+    },
+    {
+      "vehicle_id": "vehicle_003",
+      "host": "127.0.0.1",
+      "port": 10003,
+      "home_node": "n3",
+      "ammo_types": [
+        "HE",
+        "SMOKE"
+      ],
+      "speed_mps": 7.8,
+      "kinematics": {
+        "width_m": 2.75,
+        "length_m": 7.9,
+        "wheelbase_m": 4.35,
+        "min_turn_radius_m": 13.0,
+        "max_turn_angle_deg": 102.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 11.0,
+        "max_edge_curvature": 0.07692,
+        "max_speed_mps": 7.8
+      }
+    }
+  ],
+  "transport": {
+    "type": "tcp",
+    "tcp": {
+      "connect_timeout_sec": 1.5,
+      "read_timeout_sec": 2.0,
+      "max_retries": 3,
+      "retry_backoff_sec": 0.15
+    },
+    "kafka": {
+      "bootstrap_servers": [
+        "127.0.0.1:9092"
+      ],
+      "topic_task_package": "mvs.task.package",
+      "topic_vehicle_telemetry": "mvs.vehicle.telemetry",
+      "topic_command_prefix": "mvs.scheduler.command",
+      "consumer_group": "mvs.default",
+      "client_id": "mvs-scheduler"
+    }
+  }
+}

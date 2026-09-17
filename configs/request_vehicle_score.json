@@ -1,0 +1,19 @@
+{
+  "msg_type": "REQUEST_VEHICLE_SCORE",
+  "data": {
+    "vehicles": [
+      {
+        "vehicle_id": 8414,
+        "port": 8414
+      },
+      {
+        "vehicle_id": 8415,
+        "port": 8415
+      },
+      {
+        "vehicle_id": 8416,
+        "port": 8416
+      }
+    ]
+  }
+}

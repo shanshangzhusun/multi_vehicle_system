@@ -1,0 +1,147 @@
+{
+  "vehicle_id": "8435",
+  "listen_host": "0.0.0.0",
+  "listen_port": 8435,
+  "advertise_host": "192.168.2.8",
+  "advertise_port": 8435,
+  "candidate_result_host": "192.168.2.10",
+  "candidate_result_port": 8888,
+  "transport": {
+    "type": "tcp",
+    "tcp": {
+      "connect_timeout_sec": 1.5,
+      "read_timeout_sec": 2.0,
+      "max_retries": 3,
+      "retry_backoff_sec": 0.15
+    },
+    "kafka": {
+      "bootstrap_servers": [
+        "127.0.0.1:9092"
+      ],
+      "topic_task_package": "mvs.task.package",
+      "topic_vehicle_telemetry": "mvs.vehicle.telemetry",
+      "topic_command_prefix": "mvs.scheduler.command",
+      "consumer_group": "mvs.default",
+      "client_id": "mvs-vehicle"
+    }
+  },
+  "lane_graph_cache_limit": 32768,
+  "lane_graph_prewarm": {
+    "enabled": false,
+    "mode": "background",
+    "include_hide_points": true
+  },
+  "fire_platform_model": {
+    "enabled": true,
+    "host": "192.168.2.10",
+    "port": 8888,
+    "target": "scheduler_model",
+    "initial_delay_sec": 0.5,
+    "request_interval_sec": 2.0,
+    "require_ack": true,
+    "response_require_ack": false,
+    "auto_request_enabled": false
+  },
+  "home_node": "r_n94732",
+  "ammo_types": [
+    "HE",
+    "AP"
+  ],
+  "ammo_capacity": 6,
+  "speed_mps": 22.222,
+  "kinematics": {
+    "width_m": 2.82,
+    "length_m": 7.9,
+    "wheelbase_m": 4.28,
+    "min_turn_radius_m": 13.3,
+    "max_steer_deg": 28.0,
+    "max_turn_angle_deg": 108.0,
+    "min_clearance_m": 0.8,
+    "turn_penalty": 10.5,
+    "max_edge_curvature": 0.07519,
+    "max_speed_mps": 22.222
+  },
+  "planning": {
+    "algorithm": "hybrid_a_star",
+    "step_m": 4.0,
+    "yaw_resolution_deg": 10.0,
+    "position_resolution_m": 4.0,
+    "max_steer_deg": 28.0,
+    "steering_samples": 7,
+    "goal_pos_tolerance_m": 12.0,
+    "goal_yaw_tolerance_deg": 35.0,
+    "reverse_enabled": false,
+    "steering_change_penalty": 1.2,
+    "gear_switch_penalty": 8.0,
+    "corridor_margin_m": 3.5,
+    "max_expansions": 25000,
+    "max_hide_candidates": 2
+  },
+  "predict_model_bias": 1.05,
+  "time_predict_model_path": "",
+  "realtime_scale": 0.0125,
+  "simulation_mode": "discrete_event",
+  "reload_duration_sec": 60.0,
+  "hide_strategy": {
+    "trigger_slack_sec": 60.0,
+    "min_wait_sec": 30.0
+  },
+  "launch_timing": {
+    "hot_distance_threshold_m": 5000.0,
+    "cold_distance_threshold_m": 5000.0,
+    "launch_prepare_sec": 300.0,
+    "hot_standby_sec": 180.0,
+    "cold_standby_sec": 420.0,
+    "hot_startup_sec": 180.0,
+    "cold_startup_sec": 420.0
+  },
+  "map": {
+    "source_type": "graph_json",
+    "graph_json": "result/theaters/henan/data/road_graph_shp_demo.json",
+    "points_json": "result/theaters/henan/data/special_points_shp_demo.json",
+    "xodr_path": "",
+    "shp_path": "",
+    "shp_points_path": "",
+    "default_lane_width_m": 8.0,
+    "default_speed_limit_mps": 10.0
+  },
+  "vehicle_context_score_submit_host": "192.168.2.12",
+  "vehicle_context_score_submit_port_base": 8414,
+  "theater_id": "henan",
+  "model_message_type_tag": "",
+  "vehicle_scoring": {
+    "health": 1.0,
+    "health_weight": 0.15,
+    "fire_pool_bonus": 8.0,
+    "fire_pool_bounds": [
+      112.650921,
+      31.174717,
+      114.197711,
+      33.111033
+    ]
+  },
+  "health": 1.0,
+  "launch_scoring": {
+    "support_score": 80.0,
+    "support_weight": 0.3,
+    "launch_capacity": 1,
+    "hide_via_weight": 0.15
+  },
+  "theater_bounds": [
+    113.269684,
+    31.674006,
+    115.040885,
+    32.797636
+  ],
+  "message_capture": {
+    "enabled": true,
+    "dir": "result/message_capture/vehicle/8435"
+  },
+  "manual_debug": {
+    "enabled": true
+  },
+  "received_dian_capture": {
+    "enabled": false,
+    "dir": "result/received_dian"
+  }
+}

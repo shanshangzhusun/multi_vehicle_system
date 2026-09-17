@@ -1,0 +1,85 @@
+{
+  "network": {
+    "local_host": "127.0.0.8",
+    "advertise_host": "127.0.0.8"
+  },
+  "runtime": {
+    "out_root": "result"
+  },
+  "map": {
+    "roads_shp": "luwang_data/china-240101-free.shp/gis_osm_roads_free_1.shp",
+    "bbox": "112.650921,31.174717,115.744501,33.111033",
+    "hide_point_count": 0,
+    "launch_point_count": 0
+  },
+  "vehicles": {
+    "count": 64,
+    "port_base": 8413,
+    "gateway_port": 9190,
+    "vehicle_start_port": 8414,
+    "vehicle_count": 64,
+    "home_nodes": [],
+    "vehicle_configs": []
+  },
+  "vehicle_tuning": {
+    "speed_mps": 22.222
+  },
+  "model": {
+    "local_host": "127.0.0.10",
+    "host": "127.0.0.10",
+    "port": 8888,
+    "callback_host": "127.0.0.10",
+    "callback_port": 8888,
+    "prelaunch_only": true,
+    "external_vehicle_selection_enabled": true,
+    "require_nodes_for_dispatch": true,
+    "task_start_delay_sec": 8.0,
+    "vehicle_ready_min_online_ratio": 1.0,
+    "vehicle_ready_timeout_sec": 120.0,
+    "vehicle_ready_poll_sec": 0.5,
+    "vehicle_ready_stable_rounds": 2,
+    "task_gap_scale": 0.0125,
+    "auto_stop_on_completion": false,
+    "completion_poll_sec": 2.0,
+    "completion_stable_rounds": 3,
+    "completion_timeout_sec": 7200,
+    "quiet_logs": true
+  },
+  "fire_platform": {
+    "node": {
+      "local_host": "127.0.0.12",
+      "host": "127.0.0.12",
+      "port": 9170,
+      "request_interval_sec": 2.0,
+      "score_port_base": 8414,
+      "score_port_count": 64,
+      "score_select_settle_sec": 1.0,
+      "selection_candidate_limit": 32
+    }
+  },
+  "schedulers": {
+    "count": 1,
+    "node_id_prefix": "scheduler",
+    "listen_port_start": 9120,
+    "dashboard_port_start": 19120,
+    "routing": "primary",
+    "vehicle_partition": "all",
+    "platforms": []
+  },
+  "depot": {
+    "capacity": 16,
+    "reload_duration_sec": 60.0,
+    "points": [],
+    "software": {
+      "local_host": "127.0.0.8",
+      "host": "127.0.0.8",
+      "reply_host": "127.0.0.8",
+      "port": 9130
+    },
+    "node": {
+      "local_host": "127.0.0.12",
+      "host": "127.0.0.12",
+      "port": 9180
+    }
+  }
+}

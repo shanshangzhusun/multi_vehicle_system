@@ -1,0 +1,24 @@
+{
+  "base_config": "result/configs/scheduler_debug.json",
+  "vehicle_partition": "all",
+  "schedulers": [
+    {
+      "node_id": "scheduler_001",
+      "host": "192.168.2.8",
+      "port": 9120,
+      "dashboard_port": 19120,
+      "config": "result/configs/schedulers/scheduler_001.json",
+      "event_log_path": "logs/scheduler_001_events.jsonl",
+      "vehicle_count": 64
+    },
+    {
+      "node_id": "scheduler_002",
+      "host": "192.168.2.8",
+      "port": 9121,
+      "dashboard_port": 19121,
+      "config": "result/configs/schedulers/scheduler_002.json",
+      "event_log_path": "logs/scheduler_002_events.jsonl",
+      "vehicle_count": 64
+    }
+  ]
+}

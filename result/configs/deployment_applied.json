@@ -1,0 +1,20 @@
+{
+  "deployment_config": "configs/deployment_topology.local_192.json",
+  "run_root": "result",
+  "theater_maps": [
+    {
+      "id": "henan",
+      "source_type": "graph_json",
+      "graph_json": "result/theaters/henan/data/road_graph_shp_demo.json",
+      "points_json": "result/theaters/henan/data/special_points_shp_demo.json"
+    },
+    {
+      "id": "guangdong",
+      "source_type": "graph_json",
+      "graph_json": "result/theaters/guangdong/data/road_graph_shp_demo.json",
+      "points_json": "result/theaters/guangdong/data/special_points_shp_demo.json"
+    }
+  ],
+  "vehicles": [],
+  "scheduler_platforms_config": "result/configs/scheduler_platforms.json"
+}

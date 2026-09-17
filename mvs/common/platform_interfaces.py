@@ -1,0 +1,72 @@
+from __future__ import annotations
+
+from typing import Any, Dict, Optional, Tuple
+
+#接收msg_type转为本地环境变量
+MSG_REQUEST_TIME_BACKPLAN = "REQUEST_TIME_BACKPLAN"
+MSG_TIME_BACKPLAN_RESULT = "TIME_BACKPLAN_RESULT"
+
+MSG_REQUEST_VEHICLE_ASSIGNMENT = "REQUEST_VEHICLE_ASSIGNMENT"
+MSG_VEHICLE_ASSIGNMENT_RESULT = "VEHICLE_ASSIGNMENT_RESULT"
+MSG_REQUEST_VEHICLE_CANDIDATE = "REQUEST_VEHICLE_CANDIDATE"
+
+MSG_REQUEST_VEHICLE_SCORE = "REQUEST_VEHICLE_SCORE"
+MSG_REQUEST_FALSE_SCORE = "REQUEST_FALSE_SCORE"
+MSG_REQUEST_VEHICLE = "REQUEST_VEHICLE"
+MSG_REQUEST_DIAN = "REQUEST_DIAN"
+MSG_FA_SHE_DIAN = "FA_SHE_DIAN"
+MSG_YIN_BI_DIAN = "YIN_BI_DIAN"
+MSG_VEHICLE_DIAN = "VEHICLE_DIAN"
+MSG_DEPOT_DIAN = "DEPOT_DIAN"
+MSG_ZHU_BEI_DIAN = "ZHU_BEI_DIAN"
+MSG_ZHU_BEI_KU_DIAN = "ZHU_BEI_KU_DIAN"
+MSG_TIME_BACKPLAN_CONTEXT = "TIME_BACKPLAN_CONTEXT"
+MSG_VEHICLE_CANDIDATE_CONTEXT = "VEHICLE_CANDIDATE_CONTEXT"
+MSG_VEHICLE_CANDIDATE_PATH_RESULT = "VEHICLE_CANDIDATE_PATH_RESULT"
+MSG_VEHICLE_SCORE_RESULT = "VEHICLE_SCORE_RESULT"
+MSG_SELECTED_VEHICLE_RESULT = "SELECTED_VEHICLE_RESULT"
+MSG_SELECTED_DEPOT_RESULT = "SELECTED_DEPOT_RESULT"
+MSG_VEHICLE_PLANNING_CONTEXT_RESULT = "VEHICLE_PLANNING_CONTEXT_RESULT"
+
+MSG_REQUEST_DEPOT_ASSIGNMENT_CONTEXT = "REQUEST_DEPOT_ASSIGNMENT_CONTEXT"
+MSG_DEPOT_ASSIGNMENT_CONTEXT_RESULT = "DEPOT_ASSIGNMENT_CONTEXT_RESULT"
+
+MSG_DEPOT_ASSIGN_REQUEST = "DEPOT_ASSIGN_REQUEST"
+MSG_DEPOT_ASSIGNMENT_RESULT = "DEPOT_ASSIGNMENT_RESULT"
+
+MSG_REQUEST_DEPOT_SCORE = "REQUEST_DEPOT_SCORE"
+MSG_REQUEST_DEPOT = "REQUEST_DEPOT"
+MSG_DEPOT_CONTEXT = "DEPOT_CONTEXT"
+MSG_ZHU_BEI_CONTEXT = "ZHU_BEI_CONTEXT"
+MSG_DEPOT_SCORE_RESPONSE = "DEPOT_SCORE_RESPONSE"
+
+# Two-stage depot assignment flow.  The legacy depot/model score messages above
+# remain available for compatibility, but are not used by this flow.
+MSG_DEPOT_VEHICLE_SCORE_CONTEXT = "DEPOT_VEHICLE_SCORE_CONTEXT"
+MSG_DEPOT_VEHICLE_SCORE_RESULT = "DEPOT_VEHICLE_SCORE_RESULT"
+MSG_VEHICLE_DEPOT_ASSIGNMENT = "VEHICLE_DEPOT_ASSIGNMENT"
+MSG_VEHICLE_POST_FIRE_PATH_RESULT = "VEHICLE_POST_FIRE_PATH_RESULT"
+
+MSG_DISPATCH_TRAJECTORY_BUNDLE = "DISPATCH_TRAJECTORY_BUNDLE"
+
+
+def reply_address(payload: Dict[str, Any], fallback: Optional[Tuple[str, int]] = None) -> Optional[Tuple[str, int]]:
+    host = (
+        payload.get("reply_host")
+        or payload.get("response_host")
+        or payload.get("msg_ip")
+        or payload.get("ip")
+        or payload.get("host")
+    )
+    port = payload.get("reply_port") or payload.get("response_port") or payload.get("port")
+    if host and port:
+        return str(host), int(port)
+    return fallback
+
+
+def correlation_fields(payload: Dict[str, Any]) -> Dict[str, Any]:
+    out: Dict[str, Any] = {}
+    for key in ("request_id", "task_id", "wave_id", "subtask_id", "vehicle_id", "port"):
+        if key in payload:
+            out[key] = payload.get(key)
+    return out

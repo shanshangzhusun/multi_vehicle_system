@@ -1,0 +1,41 @@
+{
+  "count": 2,
+  "base_config": "result/configs/scheduler_debug.json",
+  "out_dir": "result/configs/schedulers",
+  "manifest": "result/configs/schedulers_manifest.json",
+  "node_id_prefix": "scheduler",
+  "listen_port_start": 9120,
+  "dashboard_port_start": 19120,
+  "event_log_dir": "logs",
+  "vehicle_partition": "all",
+  "platforms": [
+    {
+      "node_id": "scheduler_001",
+      "listen_port": 9120,
+      "dashboard_port": 19120,
+      "theater_id": "henan",
+      "model_message_type_tag": "26D",
+      "host": "192.168.2.8",
+      "listen_host": "0.0.0.0",
+      "scheduler_map_override": {
+        "source_type": "graph_json",
+        "graph_json": "result/theaters/henan/data/road_graph_shp_demo.json",
+        "points_json": "result/theaters/henan/data/special_points_shp_demo.json"
+      }
+    },
+    {
+      "node_id": "scheduler_002",
+      "listen_port": 9121,
+      "dashboard_port": 19121,
+      "theater_id": "guangdong",
+      "model_message_type_tag": "27",
+      "host": "192.168.2.8",
+      "listen_host": "0.0.0.0",
+      "scheduler_map_override": {
+        "source_type": "graph_json",
+        "graph_json": "result/theaters/guangdong/data/road_graph_shp_demo.json",
+        "points_json": "result/theaters/guangdong/data/special_points_shp_demo.json"
+      }
+    }
+  ]
+}

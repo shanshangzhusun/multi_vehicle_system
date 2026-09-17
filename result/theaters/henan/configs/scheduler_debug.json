@@ -1,0 +1,2883 @@
+{
+  "node_id": "scheduler_shp_demo",
+  "listen_host": "0.0.0.0",
+  "listen_port": 9120,
+  "transport": {
+    "type": "tcp",
+    "tcp": {
+      "connect_timeout_sec": 1.5,
+      "read_timeout_sec": 2.0,
+      "max_retries": 3,
+      "retry_backoff_sec": 0.15
+    },
+    "kafka": {
+      "bootstrap_servers": [
+        "127.0.0.1:9092"
+      ],
+      "topic_task_package": "mvs.task.package",
+      "topic_vehicle_telemetry": "mvs.vehicle.telemetry",
+      "topic_command_prefix": "mvs.scheduler.command",
+      "consumer_group": "mvs.default",
+      "client_id": "mvs-scheduler"
+    }
+  },
+  "lane_graph_cache_limit": 65536,
+  "lane_graph_prewarm": {
+    "enabled": false,
+    "mode": "background",
+    "include_hide_points": false,
+    "include_return_home": false,
+    "max_pairs": 2000,
+    "stop_on_work": true
+  },
+  "dashboard_host": "0.0.0.0",
+  "dashboard_port": 19120,
+  "tick_sec": 0.4,
+  "heartbeat_timeout_sec": 5.0,
+  "proposal_timeout_sec": 4.0,
+  "max_proposal_retries": 2,
+  "reservation_slot_sec": 1,
+  "reservation_delay_step_sec": 2.0,
+  "reservation_max_delay_sec": 180.0,
+  "reservation_reserve_wait_nodes": false,
+  "reservation_retention_sec": 30.0,
+  "reservation_deadlock_backoff_sec": 5.0,
+  "depot_capacity": 16,
+  "reload_duration_sec": 60.0,
+  "depot_platform": {
+    "enabled": true,
+    "host": "192.168.2.8",
+    "port": 9130,
+    "reply_host": "192.168.2.8",
+    "assignment_timeout_sec": 4.0,
+    "connect_timeout_sec": 0.35,
+    "ack_timeout_sec": 0.8,
+    "max_failures": 3
+  },
+  "redundancy": {
+    "enabled": true,
+    "ratio": 0.2
+  },
+  "launch_timing": {
+    "hot_distance_threshold_m": 5000.0,
+    "cold_distance_threshold_m": 5000.0,
+    "launch_prepare_sec": 300.0,
+    "hot_standby_sec": 180.0,
+    "cold_standby_sec": 420.0,
+    "hot_startup_sec": 180.0,
+    "cold_startup_sec": 420.0
+  },
+  "allowed_ammo_types": [
+    "HE",
+    "AP",
+    "SMOKE"
+  ],
+  "max_task_launches": 128,
+  "reject_past_fire_time": false,
+  "past_time_grace_sec": 30.0,
+  "map": {
+    "source_type": "graph_json",
+    "graph_json": "result/theaters/henan/data/road_graph_shp_demo.json",
+    "points_json": "result/theaters/henan/data/special_points_shp_demo.json",
+    "xodr_path": "",
+    "shp_path": "",
+    "shp_points_path": "",
+    "default_lane_width_m": 8.0,
+    "default_speed_limit_mps": 10.0
+  },
+  "assignment_scoring": {
+    "distance_weight": 35.0,
+    "travel_time_weight": 40.0,
+    "lateness_penalty_weight": 1.2,
+    "fire_zone_bonus": 25.0,
+    "vehicle_platform_score": {
+      "enabled": true,
+      "request_limit_per_subtask": 24
+    },
+    "project_book": {
+      "enabled": true,
+      "w_distance": 1.0,
+      "w_hide": 0.6,
+      "w_support": 1.2,
+      "support_radius_m": 5000.0,
+      "depot_score_default": 80.0,
+      "count_weight": 0.4,
+      "mean_weight": 0.35,
+      "route_match_weight": 0.25,
+      "max_nearby_depots": 3,
+      "decision_weight": 4.0
+    },
+    "depot_book": {
+      "enabled": true,
+      "busy_alpha": 1.0,
+      "prep_beta": 1.0,
+      "time_nearest_vehicle_k": 3,
+      "min_time_ratio": 0.001
+    },
+    "max_route_candidates": 8,
+    "max_route_candidates_real": 8,
+    "max_route_candidates_reserved": 8,
+    "max_route_candidates_redundant": 4,
+    "max_active_real_planning_subtasks": 0,
+    "max_active_redundant_planning_subtasks": 0,
+    "max_active_real_planning_per_task": 0,
+    "max_active_redundant_planning_per_task": 0,
+    "max_active_real_task_groups": 0,
+    "max_active_redundant_task_groups": 0,
+    "max_lateness_sec": 5.0,
+    "fire_window_grace_sec": 15.0,
+    "fire_window_grace_after_resets": 2,
+    "max_assignment_resets": 8,
+    "to_fire_deadlock_bypass_after_resets": 0,
+    "to_fire_local_deadlock_retries": 1,
+    "to_fire_local_deadlock_backoff_sec": 0.5,
+    "max_no_candidate_ticks": 32
+  },
+  "fire_zone": {
+    "enabled": true,
+    "mode": "half_map",
+    "axis": "x",
+    "side": "east",
+    "bbox": [
+      -923.334,
+      -73984.61,
+      95939.163,
+      76925.925
+    ],
+    "bonus_score": 25.0,
+    "description": "half_map_east"
+  },
+  "launch_capability": {},
+  "vehicles": [
+    {
+      "vehicle_id": "8414",
+      "host": "127.0.0.1",
+      "port": 8414,
+      "home_node": "r_n41112",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 7.55,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 12.4,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.08065,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8415",
+      "host": "127.0.0.1",
+      "port": 8415,
+      "home_node": "r_n46103",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 7.9,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 13.3,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.07519,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8416",
+      "host": "127.0.0.1",
+      "port": 8416,
+      "home_node": "r_n132725",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 8.25,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 14.2,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.07042,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8417",
+      "host": "127.0.0.1",
+      "port": 8417,
+      "home_node": "r_n25634",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 7.2,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 11.5,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.08696,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8418",
+      "host": "127.0.0.1",
+      "port": 8418,
+      "home_node": "r_n29551",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 7.55,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 12.4,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.08065,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8419",
+      "host": "127.0.0.1",
+      "port": 8419,
+      "home_node": "r_n76639",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 7.9,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 13.3,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.07519,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8420",
+      "host": "127.0.0.1",
+      "port": 8420,
+      "home_node": "r_n98154",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 8.25,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 14.2,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.07042,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8421",
+      "host": "127.0.0.1",
+      "port": 8421,
+      "home_node": "r_n113015",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 7.2,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 11.5,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.08696,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8422",
+      "host": "127.0.0.1",
+      "port": 8422,
+      "home_node": "r_n17379",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 7.55,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 12.4,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.08065,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8423",
+      "host": "127.0.0.1",
+      "port": 8423,
+      "home_node": "r_n5029",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 7.9,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 13.3,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.07519,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8424",
+      "host": "127.0.0.1",
+      "port": 8424,
+      "home_node": "r_n132723",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 8.25,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 14.2,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.07042,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8425",
+      "host": "127.0.0.1",
+      "port": 8425,
+      "home_node": "r_n26789",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 7.2,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 11.5,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.08696,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8426",
+      "host": "127.0.0.1",
+      "port": 8426,
+      "home_node": "r_n35973",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 7.55,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 12.4,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.08065,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8427",
+      "host": "127.0.0.1",
+      "port": 8427,
+      "home_node": "r_n7567",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 7.9,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 13.3,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.07519,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8428",
+      "host": "127.0.0.1",
+      "port": 8428,
+      "home_node": "r_n38621",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 8.25,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 14.2,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.07042,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8429",
+      "host": "127.0.0.1",
+      "port": 8429,
+      "home_node": "r_n36948",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 7.2,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 11.5,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.08696,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8430",
+      "host": "127.0.0.1",
+      "port": 8430,
+      "home_node": "r_n68869",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 7.55,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 12.4,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.08065,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8431",
+      "host": "127.0.0.1",
+      "port": 8431,
+      "home_node": "r_n41933",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 7.9,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 13.3,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.07519,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8432",
+      "host": "127.0.0.1",
+      "port": 8432,
+      "home_node": "r_n19517",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 8.25,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 14.2,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.07042,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8433",
+      "host": "127.0.0.1",
+      "port": 8433,
+      "home_node": "r_n42087",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 7.2,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 11.5,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.08696,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8434",
+      "host": "127.0.0.1",
+      "port": 8434,
+      "home_node": "r_n27194",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 7.55,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 12.4,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.08065,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8435",
+      "host": "127.0.0.1",
+      "port": 8435,
+      "home_node": "r_n39435",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 7.9,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 13.3,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.07519,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8436",
+      "host": "127.0.0.1",
+      "port": 8436,
+      "home_node": "r_n67600",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 8.25,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 14.2,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.07042,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8437",
+      "host": "127.0.0.1",
+      "port": 8437,
+      "home_node": "r_n13591",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 7.2,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 11.5,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.08696,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8438",
+      "host": "127.0.0.1",
+      "port": 8438,
+      "home_node": "r_n48951",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 7.55,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 12.4,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.08065,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8439",
+      "host": "127.0.0.1",
+      "port": 8439,
+      "home_node": "r_n28080",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 7.9,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 13.3,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.07519,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8440",
+      "host": "127.0.0.1",
+      "port": 8440,
+      "home_node": "r_n14863",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 8.25,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 14.2,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.07042,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8441",
+      "host": "127.0.0.1",
+      "port": 8441,
+      "home_node": "r_n21130",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 7.2,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 11.5,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.08696,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8442",
+      "host": "127.0.0.1",
+      "port": 8442,
+      "home_node": "r_n12297",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 7.55,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 12.4,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.08065,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8443",
+      "host": "127.0.0.1",
+      "port": 8443,
+      "home_node": "r_n334",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 7.9,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 13.3,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.07519,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8444",
+      "host": "127.0.0.1",
+      "port": 8444,
+      "home_node": "r_n122344",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 8.25,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 14.2,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.07042,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8445",
+      "host": "127.0.0.1",
+      "port": 8445,
+      "home_node": "r_n65313",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 7.2,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 11.5,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.08696,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8446",
+      "host": "127.0.0.1",
+      "port": 8446,
+      "home_node": "r_n41962",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 7.55,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 12.4,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.08065,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8447",
+      "host": "127.0.0.1",
+      "port": 8447,
+      "home_node": "r_n14699",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 7.9,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 13.3,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.07519,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8448",
+      "host": "127.0.0.1",
+      "port": 8448,
+      "home_node": "r_n49343",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 8.25,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 14.2,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.07042,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8449",
+      "host": "127.0.0.1",
+      "port": 8449,
+      "home_node": "r_n6051",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 7.2,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 11.5,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.08696,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8450",
+      "host": "127.0.0.1",
+      "port": 8450,
+      "home_node": "r_n17289",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 7.55,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 12.4,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.08065,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8451",
+      "host": "127.0.0.1",
+      "port": 8451,
+      "home_node": "r_n42442",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 7.9,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 13.3,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.07519,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8452",
+      "host": "127.0.0.1",
+      "port": 8452,
+      "home_node": "r_n134149",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 8.25,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 14.2,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.07042,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8453",
+      "host": "127.0.0.1",
+      "port": 8453,
+      "home_node": "r_n9560",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 7.2,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 11.5,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.08696,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8454",
+      "host": "127.0.0.1",
+      "port": 8454,
+      "home_node": "r_n17618",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 7.55,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 12.4,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.08065,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8455",
+      "host": "127.0.0.1",
+      "port": 8455,
+      "home_node": "r_n20026",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 7.9,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 13.3,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.07519,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8456",
+      "host": "127.0.0.1",
+      "port": 8456,
+      "home_node": "r_n53542",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 8.25,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 14.2,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.07042,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8457",
+      "host": "127.0.0.1",
+      "port": 8457,
+      "home_node": "r_n844",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 7.2,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 11.5,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.08696,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8458",
+      "host": "127.0.0.1",
+      "port": 8458,
+      "home_node": "r_n51490",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 7.55,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 12.4,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.08065,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8459",
+      "host": "127.0.0.1",
+      "port": 8459,
+      "home_node": "r_n4930",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 7.9,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 13.3,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.07519,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8460",
+      "host": "127.0.0.1",
+      "port": 8460,
+      "home_node": "r_n59604",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 8.25,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 14.2,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.07042,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8461",
+      "host": "127.0.0.1",
+      "port": 8461,
+      "home_node": "r_n67307",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 7.2,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 11.5,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.08696,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8462",
+      "host": "127.0.0.1",
+      "port": 8462,
+      "home_node": "r_n22553",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 7.55,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 12.4,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.08065,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8463",
+      "host": "127.0.0.1",
+      "port": 8463,
+      "home_node": "r_n16076",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 7.9,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 13.3,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.07519,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8464",
+      "host": "127.0.0.1",
+      "port": 8464,
+      "home_node": "r_n5425",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 8.25,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 14.2,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.07042,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8465",
+      "host": "127.0.0.1",
+      "port": 8465,
+      "home_node": "r_n17192",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 7.2,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 11.5,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.08696,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8466",
+      "host": "127.0.0.1",
+      "port": 8466,
+      "home_node": "r_n53731",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 7.55,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 12.4,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.08065,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8467",
+      "host": "127.0.0.1",
+      "port": 8467,
+      "home_node": "r_n6668",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 7.9,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 13.3,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.07519,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8468",
+      "host": "127.0.0.1",
+      "port": 8468,
+      "home_node": "r_n24413",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 8.25,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 14.2,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.07042,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8469",
+      "host": "127.0.0.1",
+      "port": 8469,
+      "home_node": "r_n66796",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 7.2,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 11.5,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.08696,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8470",
+      "host": "127.0.0.1",
+      "port": 8470,
+      "home_node": "r_n14551",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 7.55,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 12.4,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.08065,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8471",
+      "host": "127.0.0.1",
+      "port": 8471,
+      "home_node": "r_n13177",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 7.9,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 13.3,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.07519,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8472",
+      "host": "127.0.0.1",
+      "port": 8472,
+      "home_node": "r_n69382",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 8.25,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 14.2,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.07042,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8473",
+      "host": "127.0.0.1",
+      "port": 8473,
+      "home_node": "r_n58833",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 7.2,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 11.5,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.08696,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8474",
+      "host": "127.0.0.1",
+      "port": 8474,
+      "home_node": "r_n54060",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 7.55,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 12.4,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.08065,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8475",
+      "host": "127.0.0.1",
+      "port": 8475,
+      "home_node": "r_n38874",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.94,
+        "length_m": 7.9,
+        "wheelbase_m": 4.46,
+        "min_turn_radius_m": 13.3,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 12.0,
+        "max_edge_curvature": 0.07519,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8476",
+      "host": "127.0.0.1",
+      "port": 8476,
+      "home_node": "r_n133821",
+      "ammo_types": [
+        "HE",
+        "AP",
+        "SMOKE"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.7,
+        "length_m": 8.25,
+        "wheelbase_m": 4.1,
+        "min_turn_radius_m": 14.2,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 100.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 9.0,
+        "max_edge_curvature": 0.07042,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    },
+    {
+      "vehicle_id": "8477",
+      "host": "127.0.0.1",
+      "port": 8477,
+      "home_node": "r_n23000",
+      "ammo_types": [
+        "HE",
+        "AP"
+      ],
+      "speed_mps": 22.222,
+      "kinematics": {
+        "width_m": 2.82,
+        "length_m": 7.2,
+        "wheelbase_m": 4.28,
+        "min_turn_radius_m": 11.5,
+        "max_steer_deg": 28.0,
+        "max_turn_angle_deg": 108.0,
+        "min_clearance_m": 0.8,
+        "turn_penalty": 10.5,
+        "max_edge_curvature": 0.08696,
+        "max_speed_mps": 22.222
+      },
+      "planning": {
+        "algorithm": "hybrid_a_star",
+        "step_m": 4.0,
+        "yaw_resolution_deg": 10.0,
+        "position_resolution_m": 4.0,
+        "max_steer_deg": 28.0,
+        "steering_samples": 7,
+        "goal_pos_tolerance_m": 12.0,
+        "goal_yaw_tolerance_deg": 35.0,
+        "reverse_enabled": false,
+        "steering_change_penalty": 1.2,
+        "gear_switch_penalty": 8.0,
+        "corridor_margin_m": 3.5,
+        "max_expansions": 25000,
+        "max_hide_candidates": 2
+      }
+    }
+  ],
+  "theaters": [
+    {
+      "id": "henan",
+      "params_file": "configs/theater_params/henan.json",
+      "vehicle_port_start": 8414,
+      "vehicle_port_count": 64,
+      "bounds": [
+        113.269684,
+        31.674006,
+        115.040885,
+        32.797636
+      ],
+      "launch_scoring": {
+        "support_score": 80.0,
+        "support_weight": 0.3,
+        "launch_capacity": 1,
+        "hide_via_weight": 0.15
+      },
+      "vehicle_scoring": {
+        "health": 1.0,
+        "health_weight": 0.15,
+        "fire_pool_bonus": 8.0,
+        "fire_pool_bounds": [
+          112.650921,
+          31.174717,
+          114.197711,
+          33.111033
+        ]
+      },
+      "depot_scoring": {
+        "ammo_capacity": 20,
+        "distance_weight_a": 1.0,
+        "distance_rank_weight_b": 100.0,
+        "load_ratio_weight_c": 1000.0
+      },
+      "redundancy": {
+        "enabled": true,
+        "ratio": 0.0
+      },
+      "map_override": {
+        "source_type": "graph_json",
+        "graph_json": "result/theaters/henan/data/road_graph_shp_demo.json",
+        "points_json": "result/theaters/henan/data/special_points_shp_demo.json"
+      },
+      "vehicle_map_override": {
+        "source_type": "graph_json",
+        "graph_json": "result/theaters/henan/data/road_graph_shp_demo.json",
+        "points_json": "result/theaters/henan/data/special_points_shp_demo.json"
+      },
+      "scheduler_map_override": {
+        "source_type": "graph_json",
+        "graph_json": "result/theaters/henan/data/road_graph_shp_demo.json",
+        "points_json": "result/theaters/henan/data/special_points_shp_demo.json"
+      }
+    },
+    {
+      "id": "guangdong",
+      "params_file": "configs/theater_params/guangdong.json",
+      "vehicle_port_start": 8519,
+      "vehicle_port_count": 64,
+      "bounds": [
+        103.272821,
+        25.195127,
+        104.305541,
+        25.893927
+      ],
+      "launch_scoring": {
+        "support_score": 80.0,
+        "support_weight": 0.3,
+        "launch_capacity": 1,
+        "hide_via_weight": 0.15
+      },
+      "vehicle_scoring": {
+        "health": 1.0,
+        "health_weight": 0.15,
+        "fire_pool_bonus": 8.0,
+        "fire_pool_bounds": [
+          102.937165,
+          24.896966,
+          103.820278,
+          25.986172
+        ]
+      },
+      "depot_scoring": {
+        "ammo_capacity": 20,
+        "distance_weight_a": 1.0,
+        "distance_rank_weight_b": 100.0,
+        "load_ratio_weight_c": 1000.0
+      },
+      "redundancy": {
+        "enabled": true,
+        "ratio": 0.0
+      },
+      "map_override": {
+        "source_type": "graph_json",
+        "graph_json": "result/theaters/guangdong/data/road_graph_shp_demo.json",
+        "points_json": "result/theaters/guangdong/data/special_points_shp_demo.json"
+      },
+      "vehicle_map_override": {
+        "source_type": "graph_json",
+        "graph_json": "result/theaters/guangdong/data/road_graph_shp_demo.json",
+        "points_json": "result/theaters/guangdong/data/special_points_shp_demo.json"
+      },
+      "scheduler_map_override": {
+        "source_type": "graph_json",
+        "graph_json": "result/theaters/guangdong/data/road_graph_shp_demo.json",
+        "points_json": "result/theaters/guangdong/data/special_points_shp_demo.json"
+      }
+    }
+  ],
+  "theater_params": {
+    "henan": {
+      "launch_scoring": {
+        "support_score": 80.0,
+        "support_weight": 0.3,
+        "launch_capacity": 1,
+        "hide_via_weight": 0.15
+      },
+      "vehicle_scoring": {
+        "health": 1.0,
+        "health_weight": 0.15,
+        "fire_pool_bonus": 8.0,
+        "fire_pool_bounds": [
+          112.650921,
+          31.174717,
+          114.197711,
+          33.111033
+        ]
+      },
+      "depot_scoring": {
+        "ammo_capacity": 20,
+        "distance_weight_a": 1.0,
+        "distance_rank_weight_b": 100.0,
+        "load_ratio_weight_c": 1000.0
+      },
+      "redundancy": {
+        "enabled": true,
+        "ratio": 0.0
+      }
+    },
+    "guangdong": {
+      "launch_scoring": {
+        "support_score": 80.0,
+        "support_weight": 0.3,
+        "launch_capacity": 1,
+        "hide_via_weight": 0.15
+      },
+      "vehicle_scoring": {
+        "health": 1.0,
+        "health_weight": 0.15,
+        "fire_pool_bonus": 8.0,
+        "fire_pool_bounds": [
+          102.937165,
+          24.896966,
+          103.820278,
+          25.986172
+        ]
+      },
+      "depot_scoring": {
+        "ammo_capacity": 20,
+        "distance_weight_a": 1.0,
+        "distance_rank_weight_b": 100.0,
+        "load_ratio_weight_c": 1000.0
+      },
+      "redundancy": {
+        "enabled": true,
+        "ratio": 0.0
+      }
+    }
+  },
+  "depot_ammo_capacity": 20,
+  "disable_redundancy": false,
+  "two_stage_depot_assignment": {
+    "enabled": true,
+    "depot_host": "192.168.2.8",
+    "distance_weight_a": 1.0,
+    "distance_rank_weight_b": 100.0,
+    "load_ratio_weight_c": 1000.0,
+    "distance_metric": "euclidean"
+  },
+  "prelaunch_only": true,
+  "external_vehicle_selection_enabled": true,
+  "external_conflict_resolution": {
+    "distance_m": 5.0,
+    "selected_depot_expected_count": 10,
+    "force_emit_bundle_when_unresolved": true
+  },
+  "model_callback": {
+    "enabled": true,
+    "host": "192.168.2.10",
+    "port": 8888
+  },
+  "manual_debug": {
+    "enabled": true
+  },
+  "scheduler_theater_id": "henan",
+  "launch_scoring": {
+    "support_score": 80.0,
+    "support_weight": 0.3,
+    "launch_capacity": 1,
+    "hide_via_weight": 0.15
+  }
+}

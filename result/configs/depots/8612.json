@@ -1,0 +1,62 @@
+{
+  "node_id": "depot_8612",
+  "depot_id": "8612",
+  "depot_index": 11,
+  "theater_id": "henan",
+  "model_message_type_tag": "26D",
+  "listen_host": "0.0.0.0",
+  "listen_port": 8612,
+  "advertise_host": "192.168.2.8",
+  "advertise_port": 8612,
+  "transport": {
+    "type": "tcp",
+    "tcp": {
+      "connect_timeout_sec": 1.5,
+      "read_timeout_sec": 2.0,
+      "max_retries": 3,
+      "retry_backoff_sec": 0.15
+    },
+    "kafka": {
+      "bootstrap_servers": [
+        "127.0.0.1:9092"
+      ],
+      "topic_task_package": "mvs.task.package",
+      "topic_vehicle_telemetry": "mvs.vehicle.telemetry",
+      "topic_command_prefix": "mvs.scheduler.command",
+      "consumer_group": "mvs.default",
+      "client_id": "mvs-scheduler"
+    }
+  },
+  "map": {
+    "source_type": "graph_json",
+    "graph_json": "result/theaters/henan/data/road_graph_shp_demo.json",
+    "points_json": "result/theaters/henan/data/special_points_shp_demo.json",
+    "xodr_path": "",
+    "shp_path": "",
+    "shp_points_path": "",
+    "default_lane_width_m": 8.0,
+    "default_speed_limit_mps": 10.0
+  },
+  "lane_graph_cache_limit": 65536,
+  "depot_capacity": 16,
+  "reload_duration_sec": 60.0,
+  "resource_limit": 20,
+  "ammo_capacity": 20,
+  "assignment_scoring": {
+    "distance_weight_a": 1.0,
+    "distance_rank_weight_b": 100.0,
+    "load_ratio_weight_c": 1000.0,
+    "distance_metric": "euclidean"
+  },
+  "depot_model": {
+    "enabled": false,
+    "host": "192.168.2.10",
+    "port": 8888,
+    "target": "scheduler_model"
+  },
+  "event_log_path": "logs/8612_events.jsonl",
+  "message_capture": {
+    "enabled": true,
+    "dir": "result/message_capture/depot/8612"
+  }
+}

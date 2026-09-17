@@ -1,0 +1,586 @@
+多车系统贮备库接入消息协议与流程说明
+
+【当前生效流程（2026-07-20）】
+贮备库不再通过 gateway 向模型请求评分，模型也不再返回 SELECTED_DEPOT_RESULT。
+当前流程为：车辆首轮仅规划射前路径；调度射前冲突消解后发送
+DEPOT_VEHICLE_SCORE_CONTEXT 给每个贮备库；各库读取点位中的 capacity，返回
+DEPOT_VEHICLE_SCORE_RESULT 分数数组；调度全局容量分配后向车辆发送
+VEHICLE_DEPOT_ASSIGNMENT；车辆返回 VEHICLE_POST_FIRE_PATH_RESULT；调度完成射后
+冲突消解、拼接射前轨迹后发送 DISPATCH_TRAJECTORY_BUNDLE。
+本文后续 REQUEST_DEPOT_SCORE、DEPOT_CONTEXT、SELECTED_DEPOT_RESULT 内容仅为旧协议兼容说明，
+不参与当前主流程。
+版本：2026-06-29
+
+一、总体目标
+
+现在系统分两个战区：
+1. 河南战区：group = 26D
+2. 广东战区：group = 27
+
+每个战区各自有一个调度平台、对应车辆、对应发射点、隐蔽点、贮备库点位。
+调度平台向模型请求点位时必须带 group。
+模型根据 group 向对应调度平台、车辆、贮备库发送对应战区的数据。
+
+贮备库共 24 个，和车辆一样作为独立进程启动。
+8601-8612 属于河南战区，group=26D。
+8613-8624 属于广东战区，group=27。
+另启动一个 depot gateway，默认监听 9191。
+贮备库容量、补给耗时、资源总量等由贮备库配置控制，默认容量 capacity = 1。
+
+
+二、点位同步流程
+
+1. 调度平台 -> 模型：请求点位
+
+消息头：
+REQUEST_DIAN
+
+示例：
+{
+  "msg_type": "REQUEST_DIAN",
+  "group": "26D",
+  "data": {}
+}
+
+说明：
+group=26D 表示河南战区。
+group=27 表示广东战区。
+
+
+2. 模型 -> 调度平台：发送发射点
+
+消息头：
+FA_SHE_DIAN
+
+示例：
+{
+  "msg_type": "FA_SHE_DIAN",
+  "group": "26D",
+  "data": [
+    {
+      "name": "发射阵地_1",
+      "index": 1,
+      "lon": 114.467,
+      "lat": 32.0089,
+      "alt": 0,
+      "type": "DF_FIRING_POSITION",
+      "side": "红方"
+    }
+  ]
+}
+
+
+3. 模型 -> 调度平台：发送隐蔽点
+
+消息头：
+YIN_BI_DIAN
+
+示例：
+{
+  "msg_type": "YIN_BI_DIAN",
+  "group": "26D",
+  "data": [
+    {
+      "name": "隐蔽待机阵地_1",
+      "index": 101,
+      "lon": 114.401,
+      "lat": 32.001,
+      "alt": 0,
+      "type": "DF_HIDE_POSITION",
+      "side": "红方"
+    }
+  ]
+}
+
+
+4. 模型 -> 调度平台：发送车辆点
+
+消息头：
+VEHICLE_DIAN
+
+示例：
+{
+  "msg_type": "VEHICLE_DIAN",
+  "group": "26D",
+  "data": {
+    "vehicle_id": 8414,
+    "port": 8414,
+    "name": "东风26D发射车_1",
+    "lon": 114.3001,
+    "lat": 31.9001,
+    "alt": 0,
+    "type": "DF26DLaunchCar",
+    "side": "红方"
+  }
+}
+
+说明：
+VEHICLE_DIAN 可以逐车发送。
+车辆端只应使用自己的 VEHICLE_CONTEXT / VEHICLE_DIAN 更新自身位置。
+
+
+5. 模型 -> 调度平台：发送贮备库点
+
+建议标准消息头：
+ZHU_BEI_DIAN
+
+当前代码兼容以下别名：
+DEPOT_DIAN
+ZHU_BEI_DIAN
+ZHU_BEI_KU_DIAN
+
+示例：
+{
+  "msg_type": "ZHU_BEI_DIAN",
+  "group": "26D",
+  "data": [
+    {
+      "name": "贮备库_1",
+      "index": 1,
+      "lon": 114.5201,
+      "lat": 31.9801,
+      "alt": 0,
+      "type": "DEPOT",
+      "side": "红方",
+      "capacity": 1,
+      "reload_duration_sec": 60,
+      "resource_limit": 20,
+      "supported_ammo_types": ["HE", "AP", "SMOKE"]
+    }
+  ]
+}
+
+字段说明：
+capacity：同一时间可服务车辆数，默认 1。
+reload_duration_sec：单车补给耗时，默认可按配置取 60 秒。
+resource_limit：该贮备库最多可服务车辆数，例如 20。没有该字段时表示暂不限制。
+supported_ammo_types：支持弹种。没有该字段时表示默认都支持。
+
+
+三、模型向车辆转发点位
+
+模型需要给车辆发送：
+1. FA_SHE_DIAN
+2. YIN_BI_DIAN
+3. ZHU_BEI_DIAN
+4. VEHICLE_CONTEXT
+5. TIME_BACKPLAN_CONTEXT
+6. VEHICLE_CANDIDATE_CONTEXT
+
+车辆不需要接收全部车辆的 VEHICLE_DIAN。
+车辆只需要收到自己的 VEHICLE_CONTEXT，其中应包含自身位置与返回分数用的 msg_ip。
+
+VEHICLE_CONTEXT 示例：
+{
+  "msg_type": "VEHICLE_CONTEXT",
+  "group": "26D",
+  "data": {
+    "vehicle_id": 8414,
+    "port": 8414,
+    "msg_ip": "192.168.2.12",
+    "lon": 114.3001,
+    "lat": 31.9001,
+    "alt": 0,
+    "time": 10.0
+  }
+}
+
+说明：
+msg_ip 在 data 内。
+车辆收到后，后续 VEHICLE_SCORE_RESULT 应返回到 msg_ip 对应节点。
+
+
+四、模型向贮备库转发点位
+
+模型需要给贮备库发送：
+1. FA_SHE_DIAN
+2. YIN_BI_DIAN
+3. VEHICLE_DIAN
+4. ZHU_BEI_DIAN
+
+贮备库需要知道：
+1. 本战区所有车辆位置
+2. 本战区所有发射点位置
+3. 本战区所有隐蔽点位置
+4. 本战区所有贮备库位置和资源状态
+
+
+五、车辆候选路径流程
+
+1. 调度平台收到发射点、隐蔽点、车辆点、贮备库点后：
+   - 投影到本战区路网
+   - 生成时间倒排
+   - 生成车辆候选发射点
+   - 候选发射点中附带候选隐蔽点
+   - 候选上下文中附带贮备库列表
+
+2. 调度平台 -> 模型：时间倒排
+
+消息头：
+TIME_BACKPLAN_CONTEXT
+
+示例：
+{
+  "msg_type": "TIME_BACKPLAN_CONTEXT",
+  "group": "26D",
+  "data": {
+    "schema": "time_backplan_points_v1",
+    "task_id": "task_10_3600",
+    "fire_time": 3600,
+    "launch_prepare_time": 300,
+    "launch_standby_time": 180,
+    "subtasks": []
+  }
+}
+
+
+3. 调度平台 -> 模型：候选点上下文
+
+消息头：
+VEHICLE_CANDIDATE_CONTEXT
+
+示例：
+{
+  "msg_type": "VEHICLE_CANDIDATE_CONTEXT",
+  "group": "26D",
+  "data": {
+    "schema": "vehicle_candidate_context_v1",
+    "task_id": "task_10_3600",
+    "depot_points": [
+      {
+        "rank": 1,
+        "depot_node": "depot_001_贮备库_1",
+        "depot_id": "贮备库_1",
+        "name": "贮备库_1",
+        "capacity": 1,
+        "lon": 114.5201,
+        "lat": 31.9801
+      }
+    ],
+    "vehicles": [
+      {
+        "vehicle_id": "8414",
+        "vehicle_port": 8414,
+        "candidate_launch_points": [
+          {
+            "rank": 1,
+            "launch_node": "launch_001_发射阵地_1",
+            "fire_point_id": "发射阵地_1",
+            "hide_candidates": [
+              {
+                "hide_node": "hide_001_隐蔽待机阵地_1",
+                "hide_point_id": "隐蔽待机阵地_1",
+                "rank": 1
+              }
+            ],
+            "allow_direct": true
+          }
+        ]
+      }
+    ]
+  }
+}
+
+说明：
+depot_points 是调度收到并投影后的贮备库列表。
+车辆规划每条候选发射点路径时，需要同时规划：
+当前位置 -> 隐蔽点 -> 发射点
+以及发射点 -> 候选贮备库 -> 返回起点/下一任务点。
+
+
+4. 模型 -> 车辆：转发候选点上下文
+
+消息头不变：
+VEHICLE_CANDIDATE_CONTEXT
+
+模型按 group 转发给对应战区车辆。
+
+
+5. 车辆 -> 模型：返回候选路径
+
+消息头：
+VEHICLE_CANDIDATE_PATH_RESULT
+
+示例：
+{
+  "msg_type": "VEHICLE_CANDIDATE_PATH_RESULT",
+  "group": "26D",
+  "data": {
+    "task_id": "task_10_3600",
+    "vehicle_id": "8414",
+    "port": 8414,
+    "paths": [
+      {
+        "rank": 1,
+        "fire_point_id": "发射阵地_1",
+        "launch_node": "launch_001_发射阵地_1",
+        "hide_node": "hide_001_隐蔽待机阵地_1",
+        "hide_point_id": "隐蔽待机阵地_1",
+        "depot_candidates": [
+          {
+            "rank": 1,
+            "depot_id": "贮备库_1",
+            "depot_node": "depot_001_贮备库_1",
+            "travel_sec_from_launch": 300.0,
+            "distance_m_from_launch": 6500.0
+          }
+        ],
+        "score_total": 88.5,
+        "feasible": true,
+        "path_points": []
+      }
+    ]
+  }
+}
+
+
+六、车辆评分请求流程
+
+1. 节点 -> vehicle gateway
+
+消息头：
+REQUEST_VEHICLE_SCORE
+
+示例：
+{
+  "msg_type": "REQUEST_VEHICLE_SCORE",
+  "msg_ip": "192.168.2.12",
+  "port": 8414
+}
+
+
+2. vehicle gateway -> 模型
+
+消息头：
+REQUEST_VEHICLE
+
+示例：
+{
+  "msg_type": "REQUEST_VEHICLE",
+  "data": {
+    "vehicles": [
+      {
+        "vehicle_id": 8414,
+        "port": 8414,
+        "msg_ip": "192.168.2.12"
+      }
+    ]
+  }
+}
+
+
+3. 模型 -> 车辆
+
+消息头：
+VEHICLE_CONTEXT
+
+msg_ip 必须在 data 内。
+
+
+4. 车辆 -> 节点
+
+消息头：
+VEHICLE_SCORE_RESULT
+
+示例：
+{
+  "msg_type": "VEHICLE_SCORE_RESULT",
+  "data": {
+    "port": 8414,
+    "score_total": 83.57
+  }
+}
+
+
+七、贮备库评分请求流程
+
+贮备库评分流程参考车辆评分流程，需要一个 depot gateway。
+depot gateway 的职责类似 vehicle gateway：
+1. 接收节点发来的 REQUEST_DEPOT_SCORE
+2. 提取 msg_ip、depot_port、depot_id 等字段
+3. 整理为 REQUEST_DEPOT 发给模型同一个模型端口
+4. 模型再向具体贮备库进程发送 DEPOT_CONTEXT
+5. 贮备库评分后把分数返回给 msg_ip 对应的节点
+
+
+1. 节点 -> depot gateway
+
+建议消息头：
+REQUEST_DEPOT_SCORE
+
+示例：
+{
+  "msg_type": "REQUEST_DEPOT_SCORE",
+  "msg_ip": "192.168.2.12",
+  "port": 8601,
+  "depot_id": "贮备库_1"
+}
+
+
+2. depot gateway -> 模型
+
+建议消息头：
+REQUEST_DEPOT
+
+示例：
+{
+  "msg_type": "REQUEST_DEPOT",
+  "group": "26D",
+  "data": {
+    "depots": [
+      {
+        "depot_id": "贮备库_1",
+        "port": 8601,
+        "msg_ip": "192.168.2.12"
+      }
+    ]
+  }
+}
+
+
+3. 模型 -> 贮备库进程
+
+建议消息头：
+DEPOT_CONTEXT
+
+示例：
+{
+  "msg_type": "DEPOT_CONTEXT",
+  "group": "26D",
+  "data": {
+    "depot_id": "贮备库_1",
+    "port": 8601,
+    "msg_ip": "192.168.2.12",
+    "capacity": 1,
+    "reload_duration_sec": 60,
+    "resource_limit": 20,
+    "queue_count": 0,
+    "occupied": false,
+    "supported_ammo_types": ["HE", "AP", "SMOKE"]
+  }
+}
+
+
+4. 贮备库进程 -> 贮备库节点
+
+消息头：
+DEPOT_SCORE_RESPONSE
+
+示例：
+{
+  "msg_type": "DEPOT_SCORE_RESPONSE",
+  "group": "26D",
+  "data": {
+    "port": 8601,
+    "depot_id": "贮备库_1",
+    "score_total": 87.2,
+    "capacity": 1,
+    "queue_count": 0,
+    "resource_remaining": 20
+  }
+}
+
+
+5. 贮备库节点 -> 模型：选择贮备库结果
+
+建议消息头：
+SELECTED_DEPOT_RESULT
+
+示例：
+{
+  "msg_type": "SELECTED_DEPOT_RESULT",
+  "group": "26D",
+  "task_id": "task_10_3600",
+  "data": [
+    {
+      "vehicle_id": "8414",
+      "subtask_id": "task_10_3600_s001",
+      "depot_id": "贮备库_1",
+      "depot_port": 8601
+    }
+  ]
+}
+
+
+6. 模型 -> 调度平台：转发选贮备库结果
+
+消息头：
+SELECTED_DEPOT_RESULT
+
+调度平台收到后，在最终路径分配中考虑：
+1. 贮备库容量 capacity
+2. 贮备库补给耗时 reload_duration_sec
+3. 贮备库资源余量 resource_limit / resource_remaining
+4. 贮备库排队时间 queue_count
+5. 发射点 -> 贮备库 -> 返回起点/下一任务点 的路径时间
+
+
+八、最终轨迹
+
+最终轨迹仍由调度平台发给模型。
+
+消息头：
+DISPATCH_TRAJECTORY_BUNDLE
+
+新增路径语义：
+1. to_fire：车辆到隐蔽点/发射点
+2. fire：发射点执行任务
+3. to_depot：发射点到贮备库
+4. reload：贮备库补给等待/补给
+5. return_home：贮备库返回起点或下一任务点
+
+示例字段：
+{
+  "vehicle_id": "8414",
+  "fire_point_id": "发射阵地_1",
+  "hide_point_id": "隐蔽待机阵地_1",
+  "depot_id": "贮备库_1",
+  "path_points": []
+}
+
+
+九、当前需要模型侧明确配合的点
+
+1. 所有发给调度平台、车辆、贮备库的消息都带 group。
+2. 河南战区 group=26D，广东战区 group=27。
+3. 调度平台 REQUEST_DIAN 后，模型需要返回四类点位：
+   FA_SHE_DIAN
+   YIN_BI_DIAN
+   VEHICLE_DIAN
+   ZHU_BEI_DIAN
+4. 发给车辆：
+   FA_SHE_DIAN
+   YIN_BI_DIAN
+   ZHU_BEI_DIAN
+   VEHICLE_CONTEXT
+   TIME_BACKPLAN_CONTEXT
+   VEHICLE_CANDIDATE_CONTEXT
+5. 发给贮备库：
+   FA_SHE_DIAN
+   YIN_BI_DIAN
+   VEHICLE_DIAN
+   ZHU_BEI_DIAN
+   DEPOT_CONTEXT
+6. VEHICLE_CONTEXT.data.msg_ip 是车辆返回节点分数的目标 IP。
+7. DEPOT_CONTEXT.data.msg_ip 是贮备库返回节点分数的目标 IP。
+8. 贮备库点位统一使用 ZHU_BEI_DIAN；当前系统兼容 DEPOT_DIAN 和 ZHU_BEI_KU_DIAN。
+
+
+十、推荐最小联调顺序
+
+1. 先只测调度收点：
+   REQUEST_DIAN -> FA_SHE_DIAN / YIN_BI_DIAN / VEHICLE_DIAN / ZHU_BEI_DIAN
+
+2. 再测车辆评分：
+   REQUEST_VEHICLE_SCORE -> REQUEST_VEHICLE -> VEHICLE_CONTEXT -> VEHICLE_SCORE_RESULT
+
+3. 再测贮备库评分：
+   REQUEST_DEPOT_SCORE -> REQUEST_DEPOT -> DEPOT_CONTEXT -> DEPOT_SCORE_RESPONSE
+
+4. 再测车辆候选路径：
+   TIME_BACKPLAN_CONTEXT / VEHICLE_CANDIDATE_CONTEXT -> VEHICLE_CANDIDATE_PATH_RESULT
+
+5. 最后测调度最终结果：
+   SELECTED_VEHICLE_RESULT
+   SELECTED_DEPOT_RESULT
+   DISPATCH_TRAJECTORY_BUNDLE

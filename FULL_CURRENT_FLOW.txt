@@ -1,0 +1,554 @@
+multi_vehicle_system 当前完整流程说明
+更新时间：2026-08-03
+
+一、整体角色
+
+1. 模型
+   地址在 configs/deployment_topology.local_192.json 的 model 中配置。
+   当前服务器配置中模型地址是 192.168.2.10:8888。
+   模型负责：
+   - 接收调度 REQUEST_DIAN，请求点位上下文。
+   - 返回 FA_SHE_DIAN、YIN_BI_DIAN、VEHICLE_DIAN、ZHU_BEI_DIAN。
+   - 接收调度发出的 TIME_BACKPLAN_CONTEXT 和 VEHICLE_CANDIDATE_CONTEXT。
+   - 向车辆或车辆 gateway 转发评分/候选规划请求。
+   - 向调度返回 SELECTED_VEHICLE_RESULT。
+   - 接收最终 DISPATCH_TRAJECTORY_BUNDLE。
+
+2. 调度
+   当前配置有两个调度：
+   - scheduler_001：端口 9120，对应 henan，消息 tag 为 26D。
+   - scheduler_002：端口 9121，对应 guangdong，消息 tag 为 27。
+   调度负责：
+   - 请求并接收点位。
+   - 对点位进行战区过滤和路网投影。
+   - 构造车辆候选上下文并发给模型。
+   - 接收车辆候选路径结果和模型选车结果。
+   - 先做射前路径冲突消解。
+   - 如启用贮备库两阶段分配，则组织贮备库评分、全局分配、射后规划、射后冲突消解。
+   - 组装并发送最终轨迹 bundle。
+
+3. 车辆
+   当前 128 车：
+   - 8414-8477：henan。
+   - 8519-8582：guangdong。
+   当前 deployment 中车辆软件本机 host 是 192.168.2.8，车辆 gateway 端口是 9190。
+   车辆负责：
+   - 接收本车状态和候选上下文。
+   - 对本车候选发射点做射前路径规划。
+   - 将 VEHICLE_CANDIDATE_PATH_RESULT 发回模型入口，由模型转发给调度。
+   - 收到 VEHICLE_DEPOT_ASSIGNMENT 后，再规划射后路径：发射点 -> 指定贮备库 -> 补充 -> 本车起点。
+   - 将 VEHICLE_POST_FIRE_PATH_RESULT 直接回调调度。
+
+4. 贮备库
+   当前配置：
+   - gateway 端口：9191。
+   - 贮备库端口：8601 起，共 24 个。
+   - 每战区默认 12 个。
+   - 默认容量 capacity=16。
+   - 默认补充时间 reload_duration_sec=60。
+   贮备库负责：
+   - 接收调度发来的 DEPOT_VEHICLE_SCORE_CONTEXT。
+   - 对“已选车辆-发射点”逐个计算本库评分。
+   - 返回 DEPOT_VEHICLE_SCORE_RESULT 给调度。
+
+
+二、服务器运行命令
+
+1. prepare
+
+bash scripts/run_three_platform_flow.sh prepare \
+  --deployment-config configs/deployment_topology.local_192.json
+
+prepare 会做这些事：
+- 停止旧的 scheduler/vehicles/depot/LAN model 相关进程。
+- 清理 runtime 日志和导出的 result 文件。
+- 根据 deployment 生成场景配置。
+- 生成/读取路网图和特殊点配置。
+- 生成 result/configs/scheduler_debug.json。
+- 生成 result/configs/schedulers/*.json 和 schedulers_manifest.json。
+- 生成 result/configs/vehicles/*.json。
+- 生成 result/configs/vehicle_gateway.json。
+- 生成 result/configs/depots/*.json、depot_gateway.json、depots_manifest.json。
+
+2. 启动调度
+
+bash scripts/run_three_platform_flow.sh scheduler \
+  --deployment-config configs/deployment_topology.local_192.json
+
+该命令会启动 scheduler_001 和 scheduler_002。
+
+3. 启动车辆
+
+bash scripts/run_three_platform_flow.sh vehicles \
+  --deployment-config configs/deployment_topology.local_192.json
+
+该命令会启动车辆 gateway 和车辆进程。
+
+4. 启动贮备库
+
+bash scripts/run_three_platform_flow.sh depot \
+  --deployment-config configs/deployment_topology.local_192.json
+
+该命令会启动 depot_gateway 和所有 depot 进程。
+如果没有启动 depot，则射后贮备库两阶段链路不会完整走通；调度会根据状态保留射前结果或记录贮备库相关失败原因。
+
+5. 端口检查
+
+ss -ltnp | grep 9190
+ss -ltnp | grep 9191
+ss -ltnp | grep 9120
+ss -ltnp | grep 9121
+ss -ltnp | grep 8414
+ss -ltnp | grep 8601
+
+
+三、模拟请求命令
+
+1. 车辆评分请求
+
+bash scripts/send_vehicle_score_requests_mapped.sh 192.168.2.8 9190 0.1 \
+  8414-8430=192.168.2.12 \
+  8431-8477=192.168.2.14 \
+  8519-8582=192.168.2.15
+
+说明：
+- 192.168.2.8:9190 是车辆 gateway。
+- 等号右边的 IP 是模型/节点写入请求中的 msg_ip，车辆评分结果会按请求中的回调地址返回。
+- 车辆进程本身当前在 192.168.2.8。
+
+2. 贮备库评分请求
+
+bash scripts/send_depot_score_requests_mapped.sh 192.168.2.8 9191 0.1 \
+  8601-8612=192.168.2.8 \
+  8613-8624=192.168.2.8
+
+说明：
+- 192.168.2.8:9191 是 depot gateway。
+- gateway 收到 REQUEST_DEPOT_SCORE 后转发 REQUEST_ZHU_BEI 到模型。
+- 真实两阶段分配链路中，贮备库不再主动给节点发最终分配；它只在调度发 DEPOT_VEHICLE_SCORE_CONTEXT 后计算本库对车辆的评分。
+
+
+四、点位接收与投影流程
+
+1. 调度请求点位
+
+调度启动并收到任务后，向模型发送 REQUEST_DIAN。
+模型返回：
+- FA_SHE_DIAN：发射点。
+- YIN_BI_DIAN：隐蔽点。
+- VEHICLE_DIAN：车辆当前点。
+- ZHU_BEI_DIAN / DEPOT_DIAN / ZHU_BEI_KU_DIAN：贮备库点。
+
+2. 调度处理点位
+
+调度在 mvs/scheduler/scheduler_app.py 的 _on_dian_context 中处理点位：
+- normalize：统一不同 JSON 字段格式。
+- theater filter：按 scheduler_001/scheduler_002 所属战区过滤。
+- projection：把经纬度点投影到 RoadGraph 最近路段。
+- add_point_on_edge：把投影点作为图节点插入路网。
+
+调度投影后会保留：
+- node_id
+- projection_from_node
+- projection_to_node
+- projection_ratio
+- projected_x/projected_y
+- mapped_lon/mapped_lat
+
+这些字段会进入 VEHICLE_CANDIDATE_CONTEXT，供车辆复用。
+
+3. 车辆处理点位的当前优化逻辑
+
+车辆端 mvs/vehicle/vehicle_app.py 中：
+- 收到原始 FA_SHE_DIAN / YIN_BI_DIAN / ZHU_BEI_DIAN 且没有 node_id/projection_* 时，不再全量投影。
+- 这类消息只记录 projection_deferred=true。
+- 收到 VEHICLE_CANDIDATE_CONTEXT 后，只接入本车候选发射点、候选隐蔽点和需要的贮备库点。
+- 如果候选点带 projection_from_node/projection_to_node/projection_ratio，则车辆直接按调度投影引用插点，跳过最近边搜索。
+- 如果字段缺失或不匹配，车辆才兜底走最近边投影。
+
+目的：
+- 避免 128 个车辆进程重复投影同一批全量点位。
+- 原始 96 发射点 + 96 隐蔽点 + 12 贮备库不再每车全量插图。
+- 车辆只处理本车实际候选，通常是 6 个候选发射点和每个发射点 2 个候选隐蔽点。
+
+相关 timing 字段：
+- dian_context_received.projection_deferred
+- dian_context_received.projection_sec
+- dian_context_received.lane_refresh_sec
+- vehicle_candidate_context_received.projection_sec
+- vehicle_candidate_context_received.lane_refresh_sec
+
+
+五、射前候选路径流程
+
+1. 调度生成候选上下文
+
+当调度收到足够的 FA_SHE_DIAN、YIN_BI_DIAN、VEHICLE_DIAN、ZHU_BEI_DIAN 后，构造并发送：
+- TIME_BACKPLAN_CONTEXT
+- VEHICLE_CANDIDATE_CONTEXT
+
+VEHICLE_CANDIDATE_CONTEXT 内容是：
+- 每辆车的候选发射点列表。
+- 每个候选发射点的候选隐蔽点列表。
+- 候选点中带调度投影信息 node_id/projection_*。
+
+2. 车辆规划射前路径
+
+车辆收到：
+- 本车 VEHICLE_DIAN。
+- TIME_BACKPLAN_CONTEXT。
+- VEHICLE_CANDIDATE_CONTEXT。
+
+之后规划：
+- 起点 -> 隐蔽点 -> 发射点，或
+- 起点 -> 发射点，或
+- 起点等待 -> 发射点。
+
+车辆只规划射前段，不在第一次候选路径里强行带贮备库段。
+
+3. 车辆返回候选路径
+
+车辆发送：
+- VEHICLE_CANDIDATE_PATH_RESULT
+
+发送目标是 candidate_result_host/candidate_result_port，当前配置指向模型入口。
+模型再把车辆候选路径结果转发给调度。
+
+
+六、模型选车与射前冲突消解
+
+1. 模型返回选车
+
+模型返回：
+- SELECTED_VEHICLE_RESULT
+
+调度固定等待当前任务需要的选车结果数量。
+128 车双战区场景下，通常两个调度各处理本战区选车集合。
+
+2. 调度等待车辆候选路径
+
+调度收到选车结果后，会继续等待被选车辆的 VEHICLE_CANDIDATE_PATH_RESULT。
+如果缺少候选路径，会在日志中记录 external_dispatch_waiting_candidate_paths。
+
+3. 射前冲突消解
+
+调度从被选车辆的候选路径中选择可用路径，并做冲突消解。
+冲突检查目标是：
+- 不让多个车辆在同一时间空间冲突。
+- 不让多个车辆最终占用同一个发射点。
+- 优先保留可行、短耗时、满足发射时间约束的路径。
+
+射前消解完成后，调度得到：
+- 已选车辆。
+- 每辆车对应的发射点。
+- 每辆车射前无冲突路径。
+
+
+七、贮备库两阶段分配流程
+
+当前逻辑不是模型决定“某车用哪个库”。
+模型只提供贮备库点位和/或可用库集合；真正的车辆-贮备库分配由调度组织完成。
+
+1. 调度给每个贮备库发送评分上下文
+
+射前路径冲突消解完成后，调度整理：
+- 车辆 ID。
+- 车辆对应发射点。
+- 发射点经纬度。
+- 发射时间。
+- 任务所需弹种。
+- 候选贮备库容量 capacity。
+- 分数权重。
+
+然后向每个贮备库端口发送：
+- DEPOT_VEHICLE_SCORE_CONTEXT
+
+2. 贮备库计算评分
+
+贮备库对每辆被选车辆计算本库评分。
+当前分数由配置控制：
+- distance_weight_a
+- distance_rank_weight_b
+- load_ratio_weight_c
+- distance_metric
+
+默认配置在 configs/deployment_topology.local_192.json 的 depot.assignment_scoring。
+当前默认：
+- distance_weight_a = 1.0
+- distance_rank_weight_b = 100.0
+- load_ratio_weight_c = 1000.0
+- distance_metric = euclidean
+
+贮备库返回：
+- DEPOT_VEHICLE_SCORE_RESULT
+
+3. 调度全局分配
+
+调度汇总所有 DEPOT_VEHICLE_SCORE_RESULT，形成分数矩阵：
+- 行：贮备库。
+- 列：车辆。
+
+分配规则：
+- 每轮取当前最小分。
+- 确认该车辆分配给该贮备库。
+- 删除该车辆列。
+- 该贮备库 capacity 减 1。
+- 如果某库 capacity=0，则删除该库行。
+- 循环直到所有被选车辆完成分配。
+
+如果容量不足或评分矩阵不完整，调度记录 depot_global_assignment_incomplete，不伪造完整射后路径。
+
+4. 调度向车辆发送正式贮备库分配
+
+调度向每辆被选车发送：
+- VEHICLE_DEPOT_ASSIGNMENT
+
+其中包含：
+- vehicle_id
+- launch_node
+- fire_point_id
+- fire_time
+- depot
+- reply_host/reply_port
+
+5. 车辆规划射后路径
+
+车辆收到 VEHICLE_DEPOT_ASSIGNMENT 后规划：
+- 发射点 -> 指定贮备库
+- 贮备库补充等待 reload_duration_sec
+- 贮备库 -> 本车起点
+
+车辆返回：
+- VEHICLE_POST_FIRE_PATH_RESULT
+
+6. 调度射后冲突消解
+
+调度收齐 VEHICLE_POST_FIRE_PATH_RESULT 后，对射后段做冲突消解。
+如果射后冲突不能解决，则记录 post_fire_conflict_resolution_incomplete。
+如果通过审计，则把射前和射后轨迹拼接，进入最终发送阶段。
+
+
+八、最终轨迹输出
+
+调度最终发送：
+- DISPATCH_TRAJECTORY_BUNDLE
+
+当前实现会逐车拆开发给模型。
+同时保存：
+- result/latest_dispatch_trajectory_bundle.json
+
+bundle 里主要包含：
+- task_id
+- trajectories
+- resolved_count
+- unresolved_count
+- unresolved_vehicle_ids
+- unresolved_reasons
+- depot_assignment_count
+- conflict_audit
+
+如果贮备库链路不可用或未完成，则可能输出射前版本，并带：
+- depot_assignment_count = 0
+- depot_omitted_reason
+
+
+九、日志和 message_capture 位置
+
+1. 调度日志
+
+logs/scheduler_001_events.jsonl
+logs/scheduler_001_timing.jsonl
+logs/scheduler_002_events.jsonl
+logs/scheduler_002_timing.jsonl
+
+关键事件：
+- dian_context_requested
+- dian_context_received
+- vehicle_scoring_context_sent
+- selected_vehicle_result_received
+- vehicle_candidate_path_result_received
+- external_dispatch_waiting_selected_vehicles
+- external_dispatch_waiting_candidate_paths
+- prelaunch_dispatch_resolved
+- depot_vehicle_score_context_sent
+- depot_vehicle_score_result_received
+- depot_global_assignment_completed
+- vehicle_depot_assignment_sent
+- post_fire_path_result_received
+- two_stage_dispatch_completed
+- dispatch_trajectory_bundle_sent
+
+2. 车辆日志
+
+logs/8414_events.jsonl
+logs/8414_timing.jsonl
+...
+logs/8582_events.jsonl
+logs/8582_timing.jsonl
+
+关键事件：
+- dian_context_projection_deferred
+- dian_context_received
+- vehicle_candidate_context_received
+- vehicle_context_score_prepare
+- vehicle_context_score_sent / vehicle_context_score_send_failed
+- candidate_path_planning_total
+- vehicle_candidate_path_result_sent
+- vehicle_depot_assignment_received
+- post_fire_path_result_sent
+
+3. 贮备库日志
+
+logs/depot_gateway_events.jsonl
+logs/8601_events.jsonl
+logs/8601_timing.jsonl
+...
+
+关键事件：
+- depot_gateway_started
+- depot_gateway_request_received
+- depot_gateway_request_forwarded
+- depot_message_received
+- depot_vehicle_score_context_received
+- depot_vehicle_score_result_sent
+
+4. message_capture
+
+如果 configs/deployment_topology.local_192.json 中：
+
+"message_capture": {
+  "enabled": true
+}
+
+则收发包会保存到：
+
+result/message_capture/scheduler/scheduler_001/recv
+result/message_capture/scheduler/scheduler_001/send
+result/message_capture/scheduler/scheduler_002/recv
+result/message_capture/scheduler/scheduler_002/send
+
+result/message_capture/vehicle/<vehicle_id>/recv
+result/message_capture/vehicle/<vehicle_id>/send
+
+result/message_capture/depot/gateway/recv
+result/message_capture/depot/gateway/send
+result/message_capture/depot/<depot_port>/recv
+result/message_capture/depot/<depot_port>/send
+
+
+十、可视化和结果检查
+
+1. 画最终路径图
+
+python3 scripts/render_latest_dispatch_routes.py \
+  --bundle result/latest_dispatch_trajectory_bundle.json \
+  --scheduler-config result/configs/scheduler_debug.json \
+  --received-dir result/received_dian \
+  --dian-dir result/extracted_dian \
+  --out result/visuals/latest_dispatch_routes.png \
+  --focus-routes-only
+
+2. 冲突消解离线复放
+
+python3 scripts/replay_conflict_resolution.py \
+  --scheduler-config result/configs/schedulers/scheduler_001.json \
+  --capture-root result/message_capture \
+  --out-dir result/conflict_replay
+
+如果需要二区，scheduler-config 换成：
+
+result/configs/schedulers/scheduler_002.json
+
+
+十一、常见配置位置
+
+1. 是否开启 128 车
+
+configs/deployment_topology.local_192.json
+
+"vehicles": {
+  "enable_extended_128": true
+}
+
+2. 车辆数量
+
+configs/deployment_topology.local_192.json
+
+"vehicles.vehicle_count"
+"vehicles.extended_vehicle_count"
+
+3. 车辆 gateway 端口
+
+configs/deployment_topology.local_192.json
+
+"vehicles.gateway_port": 9190
+
+4. 贮备库 gateway 端口
+
+configs/deployment_topology.local_192.json
+
+"depot.gateway_port": 9191
+
+5. 贮备库端口和数量
+
+configs/deployment_topology.local_192.json
+
+"depot.start_port": 8601
+"depot.count": 24
+"depot.per_theater_count": 12
+
+6. 贮备库容量
+
+configs/deployment_topology.local_192.json
+
+"depot.capacity": 16
+
+7. 贮备库补充时间
+
+configs/deployment_topology.local_192.json
+
+"depot.reload_duration_sec": 60.0
+
+8. 车辆速度
+
+configs/deployment_topology.local_192.json
+
+"vehicle_tuning.speed_mps": 22.222
+
+22.222 m/s 约等于 80 km/h。
+
+9. message_capture 开关
+
+configs/deployment_topology.local_192.json
+
+"message_capture.enabled": true / false
+
+10. received_dian_capture 开关
+
+configs/deployment_topology.local_192.json
+
+"received_dian_capture.enabled": true / false
+
+
+十二、当前优化后的耗时判断
+
+正常情况下，车辆端原始点位包应出现：
+
+"projection_deferred": true
+"projection_sec": 0.0
+"lane_refresh_sec": 0.0
+
+车辆端候选上下文应出现：
+
+"stage": "vehicle_candidate_context_received"
+"parsed_candidate_count": 6
+"parsed_hide_count": 12
+"projection_sec": 一个较小数值
+"lane_refresh_sec": 一个较小数值
+
+如果服务器上 dian_context_received 仍然是几十秒或上百秒，需要优先检查：
+- 模型转发 VEHICLE_CANDIDATE_CONTEXT 时是否保留 node_id/projection_* 字段。
+- 车辆收到的原始 FA_SHE_DIAN/YIN_BI_DIAN 是否已经带 node_id；如果带但对应不上车辆图，可能会触发投影。
+- 车辆是否运行了最新代码。
+- 是否还有旧进程未停止，仍在跑旧逻辑。
+

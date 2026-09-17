@@ -1,0 +1,269 @@
+{
+  "network": {
+    "local_host": "127.0.0.1",
+    "advertise_host": "192.168.2.8"
+  },
+  "runtime": {
+    "out_root": "result"
+  },
+  "message_capture": {
+    "enabled": true
+  },
+  "manual_debug": {
+    "enabled": true
+  },
+  "received_dian_capture": {
+    "enabled": false
+  },
+  "map": {
+    "roads_shp": "luwang_data/china-240101-free.shp/gis_osm_roads_free_1.shp",
+    "bbox": "113.269684,31.674006,115.040885,32.797636",
+    "hide_point_count": 0,
+    "launch_point_count": 0
+  },
+  "theaters": [
+    {
+      "id": "26D-A",
+      "params_file": "configs/theater_params/henan_1.json",
+      "vehicle_port_start": 8414,
+      "vehicle_port_count": 36,
+      "vehicle_port_ranges": [
+        {
+          "start": 8414,
+          "end": 8449
+        }
+      ],
+      "depot_count": 6,
+      "model_message_type_tag": "26D-A",
+      "bounds": [
+        113.269684,
+        31.674006,
+        114.1552845,
+        32.797636
+      ]
+    },
+    {
+      "id": "26D-B",
+      "params_file": "configs/theater_params/henan_2.json",
+      "vehicle_port_start": 8450,
+      "vehicle_port_count": 36,
+      "vehicle_port_ranges": [
+        {
+          "start": 8450,
+          "end": 8477
+        },
+        {
+          "start": 8605,
+          "end": 8612
+        }
+      ],
+      "depot_count": 6,
+      "model_message_type_tag": "26D-B",
+      "bounds": [
+        114.1552845,
+        31.674006,
+        115.040885,
+        32.797636
+      ]
+    },
+    {
+      "id": "27-A",
+      "params_file": "configs/theater_params/guangdong_1.json",
+      "vehicle_port_start": 8519,
+      "vehicle_port_count": 36,
+      "vehicle_port_ranges": [
+        {
+          "start": 8519,
+          "end": 8554
+        }
+      ],
+      "depot_count": 6,
+      "model_message_type_tag": "27-A",
+      "bounds": [
+        103.272821,
+        25.195127,
+        103.789181,
+        25.893927
+      ]
+    },
+    {
+      "id": "27-B",
+      "params_file": "configs/theater_params/guangdong_2.json",
+      "vehicle_port_start": 8555,
+      "vehicle_port_count": 33,
+      "vehicle_port_ranges": [
+        {
+          "start": 8555,
+          "end": 8582
+        },
+        {
+          "start": 8613,
+          "end": 8617
+        }
+      ],
+      "depot_count": 6,
+      "model_message_type_tag": "27-B",
+      "bounds": [
+        103.789181,
+        25.195127,
+        104.305541,
+        25.893927
+      ]
+    }
+  ],
+  "vehicles": {
+    "count": 141,
+    "port_base": 8413,
+    "gateway_port": 9190,
+    "vehicle_start_port": 8414,
+    "vehicle_count": 141,
+    "enable_extended_128": true,
+    "extended_vehicle_start_port": 8519,
+    "extended_vehicle_count": 0,
+    "host_mappings": [
+      {
+        "start": 8414,
+        "end": 8449,
+        "host": "192.168.2.8"
+      },
+      {
+        "start": 8450,
+        "end": 8477,
+        "host": "192.168.2.8"
+      },
+      {
+        "start": 8519,
+        "end": 8554,
+        "host": "192.168.2.8"
+      },
+      {
+        "start": 8555,
+        "end": 8582,
+        "host": "192.168.2.8"
+      },
+      {
+        "start": 8605,
+        "end": 8617,
+        "host": "192.168.2.8"
+      }
+    ],
+    "home_nodes": [],
+    "vehicle_configs": []
+  },
+  "vehicle_tuning": {
+    "speed_mps": 22.222
+  },
+  "model": {
+    "local_host": "0.0.0.0",
+    "host": "192.168.2.10",
+    "port": 8888,
+    "callback_host": "192.168.2.10",
+    "callback_port": 8888,
+    "prelaunch_only": true,
+    "external_vehicle_selection_enabled": true,
+    "require_nodes_for_dispatch": true,
+    "task_start_delay_sec": 8.0,
+    "vehicle_ready_min_online_ratio": 1.0,
+    "vehicle_ready_timeout_sec": 120.0,
+    "vehicle_ready_poll_sec": 0.5,
+    "vehicle_ready_stable_rounds": 2,
+    "task_gap_scale": 0.0125,
+    "auto_stop_on_completion": false,
+    "completion_poll_sec": 2.0,
+    "completion_stable_rounds": 3,
+    "completion_timeout_sec": 7200,
+    "quiet_logs": true
+  },
+  "fire_platform": {
+    "node": {
+      "local_host": "127.0.0.1",
+      "host": "192.168.2.12",
+      "port": 9170,
+      "request_interval_sec": 2.0,
+      "score_port_base": 8414,
+      "score_port_count": 141,
+      "score_select_settle_sec": 1.0,
+      "selection_candidate_limit": 36
+    }
+  },
+  "schedulers": {
+    "count": 4,
+    "node_id_prefix": "scheduler",
+    "listen_port_start": 9120,
+    "dashboard_port_start": 19120,
+    "routing": "primary",
+    "vehicle_partition": "all",
+    "platforms": [
+      {
+        "node_id": "scheduler_001",
+        "listen_port": 9120,
+        "dashboard_port": 19120,
+        "theater_id": "26D-A",
+        "model_message_type_tag": "26D-A"
+      },
+      {
+        "node_id": "scheduler_002",
+        "listen_port": 9121,
+        "dashboard_port": 19121,
+        "theater_id": "26D-B",
+        "model_message_type_tag": "26D-B"
+      },
+      {
+        "node_id": "scheduler_003",
+        "listen_port": 9122,
+        "dashboard_port": 19122,
+        "theater_id": "27-A",
+        "model_message_type_tag": "27-A"
+      },
+      {
+        "node_id": "scheduler_004",
+        "listen_port": 9123,
+        "dashboard_port": 19123,
+        "theater_id": "27-B",
+        "model_message_type_tag": "27-B"
+      }
+    ]
+  },
+  "external_conflict_resolution": {
+    "distance_m": 5.0,
+    "selected_depot_expected_count": 6,
+    "force_emit_bundle_when_unresolved": true
+  },
+  "depot": {
+    "count": 24,
+    "start_port": 8651,
+    "per_theater_count": 6,
+    "gateway_port": 9191,
+    "capacity": 16,
+    "reload_duration_sec": 60.0,
+    "resource_limit": 20,
+    "ammo_capacity": 20,
+    "two_stage_assignment_enabled": true,
+    "assignment_scoring": {
+      "distance_weight_a": 1.0,
+      "distance_rank_weight_b": 100.0,
+      "load_ratio_weight_c": 1000.0,
+      "distance_metric": "euclidean"
+    },
+    "points": [],
+    "software": {
+      "local_host": "127.0.0.1",
+      "host": "192.168.2.8",
+      "reply_host": "192.168.2.8",
+      "port": 9130
+    },
+    "node": {
+      "local_host": "127.0.0.1",
+      "host": "192.168.2.8",
+      "port": 9180
+    }
+  },
+  "eta_time_predictor": {
+    "mode": "fallback",
+    "student_model_path": "models/eta_mlp_runtime_32x16_exit_speed.json",
+    "teacher_cached_model_path": "models/eta_mlp_teacher_400x300_exit_speed.json",
+    "teacher_direct_model_path": "models/eta_mlp_teacher_400x300_exit_speed.json",
+    "teacher_direct_variant_path": "models/eta_mlp_teacher_400x300_exit_speed_direct.json",
+    "model_path": ""
+  }
+}

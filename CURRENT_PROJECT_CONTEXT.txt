@@ -1,0 +1,502 @@
+multi_vehicle_system 当前项目交接上下文
+更新时间：2026-08-27
+
+使用方式：
+- 新聊天框先让 Codex 读取本文件。
+- 然后再提出当前要检查的问题。
+- 本文件记录的是当前工作状态，不是最终任务书文档。
+
+
+1. 项目路径
+
+项目根目录：
+/home/shanshangzhusun/multi_vehicle_system
+
+主配置：
+configs/deployment_topology.local_192.json
+
+四旅确认清单：
+FOUR_BRIGADE_CONFIRMATION_ITEMS.txt
+
+完整流程说明：
+FULL_CURRENT_FLOW.txt
+runtime_dataflow_code_trace.md
+task_book_code_implementation_details.txt
+taskbook_traceability_report.md
+
+
+2. 当前目标
+
+当前主要目标是服务器四旅模式真实联调：
+- 四个旅/四个调度平台。
+- 每个旅独立地图范围。
+- 车辆收到模型转发的信息后快速回分数。
+- 调度收到点位、倒排时间、候选路径、选车结果后完成冲突消解。
+- 贮备库按新流程参与射后分配和路径规划。
+- 最终输出无冲突轨迹给模型。
+
+
+3. 当前四旅配置
+
+配置文件：
+configs/deployment_topology.local_192.json
+
+当前四个旅：
+
+26D-A:
+- 调度/任务包接收端口：9120
+- 车辆端口：8414-8449
+- 车辆数量：36
+- 贮备库端口：8651-8656
+- 贮备库数量：6
+- 参数文件：configs/theater_params/henan_1.json
+- model_message_type_tag：26D-A
+
+26D-B:
+- 调度/任务包接收端口：9121
+- 车辆端口：8450-8477、8605-8612
+- 车辆数量：36
+- 贮备库端口：8657-8662
+- 贮备库数量：6
+- 参数文件：configs/theater_params/henan_2.json
+- model_message_type_tag：26D-B
+
+27-A:
+- 调度/任务包接收端口：9122
+- 车辆端口：8519-8554
+- 车辆数量：36
+- 贮备库端口：8663-8668
+- 贮备库数量：6
+- 参数文件：configs/theater_params/guangdong_1.json
+- model_message_type_tag：27-A
+
+27-B:
+- 调度/任务包接收端口：9123
+- 车辆端口：8555-8582、8613-8617
+- 车辆数量：33
+- 贮备库端口：8669-8674
+- 贮备库数量：6
+- 参数文件：configs/theater_params/guangdong_2.json
+- model_message_type_tag：27-B
+
+当前总车辆数：
+- 141
+
+注意：
+- 27-B 当前只有 33 辆，是按同事截图中能确认的端口写的。
+- 如果要补成 36 辆，需要把 8613-8617 扩成 8613-8620，同时把总车辆数从 141 改成 144。
+- 具体步骤写在 FOUR_BRIGADE_CONFIRMATION_ITEMS.txt 的“2.1 如果把27-B改成36辆车”。
+
+
+4. 当前四区地图范围
+
+四区范围在：
+configs/deployment_topology.local_192.json
+
+字段：
+theaters[].bounds
+
+格式：
+[lon_min, lat_min, lon_max, lat_max]
+[左下经度, 左下纬度, 右上经度, 右上纬度]
+
+当前范围：
+
+26D-A:
+[113.269684, 31.674006, 114.1552845, 32.797636]
+
+26D-B:
+[114.1552845, 31.674006, 115.040885, 32.797636]
+
+27-A:
+[103.272821, 25.195127, 103.789181, 25.893927]
+
+27-B:
+[103.789181, 25.195127, 104.305541, 25.893927]
+
+说明：
+- 河南范围按经度中线拆成 26D-A 和 26D-B。
+- 原 27 区域范围按经度中线拆成 27-A 和 27-B。
+- 每个旅面积约是原单个战区的一半。
+- 如果改了这里，必须重新 prepare。
+
+
+5. 火力区配置
+
+火力区范围不是自动跟着 theaters[].bounds 变化的。
+如果改四区地图范围，需要同步改各参数文件里的 fire_pool_bounds。
+
+位置：
+- 26D-A: configs/theater_params/henan_1.json
+- 26D-B: configs/theater_params/henan_2.json
+- 27-A: configs/theater_params/guangdong_1.json
+- 27-B: configs/theater_params/guangdong_2.json
+
+字段：
+vehicle_scoring.fire_pool_bounds
+
+当前逻辑：
+- 每个旅的火力区暂定为该旅 bounds 的左半边。
+- 车辆评分时，如果车辆当前位置 lon/lat 落入 fire_pool_bounds，就加 fire_pool_bonus。
+- fire_pool_bonus 当前为 8.0。
+
+计算规则：
+fire_pool_bounds = [
+  区域 lon_min,
+  区域 lat_min,
+  (区域 lon_min + 区域 lon_max) / 2,
+  区域 lat_max
+]
+
+
+6. 启动脚本
+
+一键全量启动：
+scripts/start_server_all.sh
+
+当前 start_server_all.sh 会做：
+1. cd 到项目根目录。
+2. 默认使用 configs/deployment_topology.local_192.json。
+3. 如果存在 .venv/bin/activate，自动 source。
+4. 如果加 --open-code，则打开 VS Code；默认不打开。
+5. 执行 prepare。
+6. 启动 scheduler。
+7. 启动车辆 gateway 和车辆进程。
+8. 启动贮备库 gateway 和贮备库进程。
+
+命令：
+bash scripts/start_server_all.sh
+
+或指定配置：
+bash scripts/start_server_all.sh \
+  --deployment-config configs/deployment_topology.local_192.json
+
+快速重启：
+scripts/restart_runtime_no_prepare.sh
+
+该脚本不会 prepare，只会：
+1. down 停进程。
+2. 清 logs、.run/logs、result/message_capture。
+3. 用已有 result/configs 重启 scheduler、vehicles、depot。
+
+重要：
+- 改地图范围、端口、车辆数、贮备库数之后，不要只跑 restart_runtime_no_prepare.sh。
+- 必须跑 start_server_all.sh 或手动 prepare。
+
+
+7. prepare 的意义
+
+prepare 会重新生成运行所需配置，包括：
+- result/configs/scheduler_debug.json
+- result/configs/schedulers/*.json
+- result/configs/vehicles/*.json
+- result/configs/depot_gateway.json
+- result/configs/depots/*.json
+- result/theaters/<theater_id>/data/road_graph_shp_demo.json
+- result/theaters/<theater_id>/data/special_points_shp_demo.json
+- result/theaters/<theater_id>/configs/scheduler_debug.json
+- result/theaters/<theater_id>/configs/vehicles/*.json
+
+只改 configs/deployment_topology.local_192.json 不 prepare 的后果：
+- 运行进程可能仍使用旧 result/configs。
+- 四区地图范围可能没有实际生效。
+- 车辆/调度/贮备库端口可能还是旧配置。
+
+
+8. 虚拟 IP
+
+start_server_all.sh 不会修改系统虚拟 IP。
+
+不会执行：
+- ip addr add
+- ifconfig
+- nmcli
+- route
+- firewall-cmd
+
+它只读取配置里的 IP。
+
+当前主要 IP 配置：
+configs/deployment_topology.local_192.json
+
+network.advertise_host:
+- 192.168.2.8
+
+model.host / model.callback_host:
+- 192.168.2.10
+
+车辆 gateway:
+- 9190
+
+贮备库 gateway:
+- 9191
+
+如果服务器网卡没有配置 192.168.2.8，程序通信可能异常，但脚本不会自动补虚拟 IP。
+
+
+9. 车辆评分请求命令
+
+车辆 gateway：
+- 9190
+
+车辆本机：
+- 192.168.2.8
+
+评分请求命令示例：
+bash scripts/send_vehicle_score_requests_mapped.sh 192.168.2.8 9190 0.1 \
+  8414-8449=<节点IP_A> \
+  8450-8477=<节点IP_B> \
+  8605-8612=<节点IP_B> \
+  8519-8554=<节点IP_C> \
+  8555-8582=<节点IP_D> \
+  8613-8617=<节点IP_D>
+
+说明：
+- 等号左侧是本系统车辆端口。
+- 等号右侧是车辆回传评分的目标节点 IP。
+- 这个 IP 不是车辆本机 IP。
+- 如果 27-B 补到 36 辆，应把 8613-8617 改成 8613-8620。
+
+
+10. 贮备库评分请求命令
+
+贮备库 gateway：
+- 9191
+
+贮备库本机：
+- 192.168.2.8
+
+示例：
+bash scripts/send_depot_score_requests_mapped.sh 192.168.2.8 9191 0.1 \
+  8651-8656=192.168.2.8 \
+  8657-8662=192.168.2.8 \
+  8663-8668=192.168.2.8 \
+  8669-8674=192.168.2.8
+
+
+11. 当前关键代码改动
+
+非连续车辆端口支持：
+- scripts/apply_deployment_config.py
+  - deployment_vehicle_ports()
+  - theater_vehicle_ports()
+  - theater_for_port()
+
+调度运行时车辆所属旅判断：
+- mvs/scheduler/scheduler_app.py
+  - _theater_vehicle_ports()
+  - _theater_for_vehicle()
+
+贮备库配置生成：
+- scripts/generate_depot_configs.py
+  - 按 theaters[].depot_count 顺序生成各旅贮备库。
+  - 当前生成 8651-8674，共24个。
+
+车辆 gateway 日志和 message_capture：
+- mvs/vehicle/vehicle_gateway.py
+  - 支持保存收发消息。
+  - 支持 vehicle_ports 非连续列表。
+
+调度候选上下文压缩：
+- mvs/scheduler/scheduler_app.py
+  - 发送 TIME_BACKPLAN_CONTEXT。
+  - 发送 VEHICLE_CANDIDATE_CONTEXT。
+  - 候选上下文用于车辆评分和后续路径规划。
+
+车辆候选上下文处理优化：
+- mvs/vehicle/vehicle_app.py
+  - _on_vehicle_candidate_context()
+  - 当前接收候选上下文时只做轻量解析，不再立即触发最近边扫描/插点。
+  - 真正规划时再把候选点解析成路网节点。
+
+车辆评分：
+- mvs/vehicle/vehicle_app.py
+  - 车辆收到 VEHICLE_CONTEXT 后可以触发评分。
+  - 评分需要 TIME_BACKPLAN_CONTEXT 和候选发射点上下文，否则会跳过。
+
+
+12. 当前四旅服务器测试出现的问题
+
+用户描述的现象：
+- 四个战区测试时，每个 logs 后面出现红色乱码。
+- 调度没有发出上下文给车辆。
+- 调度收到了 VEHICLE_DIAN，但是只有 3 个点。
+- 调度发了任务包响应和 REQUEST_DIAN。
+- 车辆收到了 VEHICLE_CONTEXT。
+- 车辆没有发分数。
+- 暂时没有完整文件可以检查。
+
+当前初步判断：
+- 最大概率不是车辆端先坏，而是调度端没有满足发送候选上下文的前置条件。
+
+调度发送上下文的门槛：
+mvs/scheduler/scheduler_app.py
+
+关键函数：
+- _on_dian_context()
+- _maybe_send_vehicle_scoring_context_to_model()
+- _send_vehicle_scoring_context_to_model()
+
+逻辑要求：
+- 发射点数量 >= 本调度车辆数
+- 隐蔽点存在
+- 车辆点数量 >= 本调度车辆数
+- 贮备库点存在
+- 贮备库已投影成功
+
+如果某个调度只收到 3 个 VEHICLE_DIAN，而 expected_vehicles 是 36 或 33，则调度会一直等待，不会发送：
+- TIME_BACKPLAN_CONTEXT
+- VEHICLE_CANDIDATE_CONTEXT
+
+车辆没有这两个上下文时，即使收到 VEHICLE_CONTEXT，也可能不会回分数。
+
+
+13. 当前最需要检查的日志关键词
+
+调度端：
+grep -n "vehicle_scoring_context_waiting_dian" logs/scheduler_*_events.jsonl
+grep -n "dian_context_received" logs/scheduler_*_events.jsonl
+grep -n "vehicle_candidate_context_sent" logs/scheduler_*_events.jsonl
+grep -n "time_backplan_context_sent" logs/scheduler_*_events.jsonl
+grep -n "vehicle_scoring_context_send_failed" logs/scheduler_*_events.jsonl
+
+车辆端：
+grep -n "vehicle_context_score_skipped" logs/84*_events.jsonl logs/85*_events.jsonl logs/86*_events.jsonl
+grep -n "vehicle_context_score_prepare" logs/84*_events.jsonl logs/85*_events.jsonl logs/86*_events.jsonl
+grep -n "vehicle_score_sent" logs/84*_events.jsonl logs/85*_events.jsonl logs/86*_events.jsonl
+grep -n "vehicle_candidate_context_received" logs/84*_events.jsonl logs/85*_events.jsonl logs/86*_events.jsonl
+grep -n "time_backplan_context_received" logs/84*_events.jsonl logs/85*_events.jsonl logs/86*_events.jsonl
+
+gateway：
+grep -n "vehicle_gateway" logs/vehicle_gateway_events.jsonl
+grep -n "request_received" logs/vehicle_gateway_events.jsonl
+grep -n "request_forwarded" logs/vehicle_gateway_events.jsonl
+
+
+14. 当前最可能原因排序
+
+原因1：四区 bounds 过滤掉了大部分 VEHICLE_DIAN
+- 调度收到点位后会按自身 theater bounds 过滤。
+- 如果车辆点坐标不在对应旅 bounds 内，就被丢掉。
+- 结果会出现 VEHICLE_DIAN 只剩 3 个。
+
+需要检查：
+- logs/scheduler_*_events.jsonl 中 dian_context_received 的 count 和 total。
+- vehicle_scoring_context_waiting_dian 里的 vehicle_count / vehicle_expected。
+- message_capture/scheduler/*/recv 里 VEHICLE_DIAN 原始数据数量。
+- 对比过滤前后数量，如果原始多、日志 count 少，就是 bounds 过滤问题。
+
+原因2：改了配置但没有 prepare
+- start_server_all.sh 会 prepare。
+- restart_runtime_no_prepare.sh 不会 prepare。
+- 如果改坐标后用 restart_runtime_no_prepare.sh，运行时可能还是旧配置。
+
+原因3：模型分组名和本系统四旅 tag 不一致
+- 当前配置使用 26D-A、26D-B、27-A、27-B。
+- 如果模型仍然只按 26D/27 或旧字段发点位，调度可能收到的数据不完整。
+
+原因4：27-B 当前只有33辆，模型或节点按36辆期待
+- 当前配置是 141 总车。
+- 如果外部按144总车发请求/选车，27-B 会不一致。
+
+原因5：红色乱码
+- 可能是日志最后一行不是完整 JSONL。
+- 也可能是异常栈、进程中断、并发写、VS Code JSON Lines 高亮异常。
+- 它更像结果，不一定是根因。
+
+
+15. 如果收到完整 logs/result 后的检查顺序
+
+第一步：确认实际运行配置
+- 看 result/configs/schedulers/*.json。
+- 看 result/configs/vehicles/*.json 数量和端口。
+- 看 result/configs/depot_gateway.json。
+- 看 result/configs/depots_manifest.json。
+- 确认是不是 26D-A/26D-B/27-A/27-B。
+
+第二步：确认每个调度收到的点位数量
+- scheduler_*_events.jsonl 中 dian_context_received。
+- 特别看 VEHICLE_DIAN、FA_SHE_DIAN、YIN_BI_DIAN、ZHU_BEI_DIAN。
+
+第三步：确认调度有没有发上下文
+- time_backplan_context_sent。
+- vehicle_candidate_context_sent。
+
+第四步：确认车辆有没有收到上下文
+- time_backplan_context_received。
+- vehicle_candidate_context_received。
+
+第五步：确认车辆评分是否跳过
+- vehicle_context_score_skipped。
+- reason 重点看：
+  - missing_time_backplan_context
+  - no_launch_points
+  - invalid_vehicle_index
+  - missing_vehicle_state
+
+第六步：确认 gateway 有没有转发评分请求
+- vehicle_gateway_events.jsonl。
+- message_capture/vehicle/gateway。
+
+
+16. 任务书和公式相关当前实现概览
+
+神经网络 ETA：
+- models/eta_mlp_runtime_32x16_exit_speed.json
+- models/eta_mlp_teacher_400x300_exit_speed.json
+- 配置在 deployment_topology.local_192.json 的 eta_time_predictor。
+- mode=fallback 表示不用权重文件，走旧模式。
+- 可切换 student、teacher_cached、teacher_direct 等模式。
+
+发射点评分：
+- mvs/common/scoring.py
+- 包括发射点代价、支撑评分、容量、隐蔽点影响等。
+- theater_params 中 launch_scoring 配置：
+  - support_score
+  - support_weight
+  - launch_capacity
+  - hide_via_weight
+
+车辆评分：
+- mvs/vehicle/vehicle_app.py
+- theater_params 中 vehicle_scoring 配置：
+  - health
+  - health_weight
+  - fire_pool_bonus
+  - fire_pool_bounds
+
+贮备库评分：
+- mvs/common/depot_assignment.py
+- mvs/depot/depot_app.py
+- theater_params 中 depot_scoring 配置：
+  - ammo_capacity
+  - distance_weight_a
+  - distance_rank_weight_b
+  - load_ratio_weight_c
+
+冗余车辆：
+- theater_params 中 redundancy 配置：
+  - enabled
+  - ratio
+
+
+17. 重要提醒
+
+不要把 VEHICLE_CONTEXT 和 VEHICLE_CANDIDATE_CONTEXT 混为一类：
+- VEHICLE_CONTEXT 是模型/节点发来的车辆状态或评分触发信息。
+- VEHICLE_CANDIDATE_CONTEXT 是调度发给模型，再由模型转发给车辆的候选上下文。
+
+车辆正常快速评分需要：
+- 收到 TIME_BACKPLAN_CONTEXT。
+- 收到 VEHICLE_CANDIDATE_CONTEXT。
+- 收到 VEHICLE_CONTEXT 触发评分。
+
+如果只有 VEHICLE_CONTEXT，没有前两个上下文，车辆不会正常回分。
+
+
+18. 新聊天建议第一句话
+
+请在新聊天框粘贴：
+
+请先读取 /home/shanshangzhusun/multi_vehicle_system/CURRENT_PROJECT_CONTEXT.txt，并以它作为当前 multi_vehicle_system 项目的上下文继续，不要从零分析。当前我要继续排查四旅服务器联调问题：调度收到 VEHICLE_DIAN 只有少量点、没有发 TIME_BACKPLAN_CONTEXT / VEHICLE_CANDIDATE_CONTEXT，车辆收到 VEHICLE_CONTEXT 但没有发分数。请先根据当前代码和我新放进来的 logs/result 检查实际原因。
+

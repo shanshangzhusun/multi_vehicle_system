@@ -1,0 +1,212 @@
+四旅模式接口与配置确认清单
+更新时间：2026-08-21
+
+本次按同事同步表更新，只采用以下字段：
+- 群组
+- 样机任务包端口
+- 发射车端口
+- 贮备库端口
+
+明确忽略字段：
+- 旅指挥车
+- 群首
+
+说明：
+- 当前配置文件：configs/deployment_topology.local_192.json
+- 四个旅的地图范围由程序先按现有路网附近经度中线二分，每个旅面积约为原单个战区的一半。
+- 车辆端口已经支持非连续范围，使用 theaters[].vehicle_port_ranges 配置。
+
+
+1. 当前已落配置
+
+26D-A:
+- 样机任务包/调度接收端口：9120
+- 发射车：8414-8449，共36辆
+- 贮备库：8651-8656，共6个
+- 配置位置：
+  - theaters[].id = 26D-A
+  - theaters[].model_message_type_tag = 26D-A
+  - schedulers.platforms[].listen_port = 9120
+
+26D-B:
+- 样机任务包/调度接收端口：9121
+- 发射车：8450-8477、8605-8612，共36辆
+- 贮备库：8657-8662，共6个
+- 配置位置：
+  - theaters[].id = 26D-B
+  - theaters[].model_message_type_tag = 26D-B
+  - schedulers.platforms[].listen_port = 9121
+
+27-A:
+- 样机任务包/调度接收端口：9122
+- 发射车：8519-8554，共36辆
+- 贮备库：8663-8668，共6个
+- 配置位置：
+  - theaters[].id = 27-A
+  - theaters[].model_message_type_tag = 27-A
+  - schedulers.platforms[].listen_port = 9122
+
+27-B:
+- 样机任务包/调度接收端口：9123
+- 发射车：8555-8582、8613-8617，共33辆
+- 贮备库：8669-8674，共6个
+- 配置位置：
+  - theaters[].id = 27-B
+  - theaters[].model_message_type_tag = 27-B
+  - schedulers.platforms[].listen_port = 9123
+
+
+2. 需要马上和同事确认的差异
+
+27-B 发射车数量：
+- 需求曾要求每旅36辆。
+- 同步表中目前能确认的是 8555-8582、8613-8617，共33辆。
+- 还差3个发射车端口，需要同事确认是否另有续段、是否图片未截全，或是否27-B实际只有33辆。
+- 如果同事补充端口，只改 configs/deployment_topology.local_192.json 中 27-B 的 vehicle_port_ranges 和 vehicle_port_count，然后重新 prepare。
+
+车辆总数：
+- 当前按表格可见端口汇总为141辆。
+- 如果27-B补齐3辆，总数应改回144。
+
+
+2.1 如果把27-B改成36辆车
+
+当前27-B：
+- 发射车：8555-8582、8613-8617，共33辆。
+
+如果同事确认27-B还要补齐到36辆，建议把第二段扩成：
+- 8555-8582、8613-8620，共36辆。
+
+需要修改 configs/deployment_topology.local_192.json：
+
+1. 修改27-B车辆数量：
+- theaters[] 中 id = 27-B 的 vehicle_port_count:
+  - 33 改成 36
+  - 位置：configs/deployment_topology.local_192.json:90-94
+
+2. 修改27-B车辆端口段：
+- theaters[] 中 id = 27-B 的 vehicle_port_ranges:
+  - {"start": 8613, "end": 8617}
+  - 改成 {"start": 8613, "end": 8620}
+  - 位置：configs/deployment_topology.local_192.json:94-102
+
+3. 修改全局车辆数量：
+- vehicles.count:
+  - 141 改成 144
+  - 位置：configs/deployment_topology.local_192.json:114-115
+- vehicles.vehicle_count:
+  - 141 改成 144
+  - 位置：configs/deployment_topology.local_192.json:118-119
+- fire_platform.node.score_port_count:
+  - 141 改成 144
+  - 位置：configs/deployment_topology.local_192.json:177-184
+
+4. 修改车辆host映射：
+- vehicles.host_mappings 中当前有：
+  - {"start": 8605, "end": 8617, "host": "192.168.2.8"}
+- 如果 8618-8620 也在本机 192.168.2.8，可以直接改成：
+  - {"start": 8605, "end": 8620, "host": "192.168.2.8"}
+- 如果 8618-8620 在别的机器，就单独新增一段 host_mappings。
+  - 位置：configs/deployment_topology.local_192.json:123-148
+
+5. 修改车辆评分请求命令：
+- 把 27-B 的请求段：
+  - 8613-8617=<节点IP_D>
+- 改成：
+  - 8613-8620=<节点IP_D>
+  - 位置：FOUR_BRIGADE_CONFIRMATION_ITEMS.txt 中第4节“车辆评分请求命令示例”
+
+6. 修改后必须重新 prepare：
+bash scripts/run_three_platform_flow.sh prepare \
+  --deployment-config configs/deployment_topology.local_192.json
+
+
+3. 地图范围
+
+当前四旅边界：
+- 26D-A: [113.269684, 31.674006, 114.1552845, 32.797636]
+- 26D-B: [114.1552845, 31.674006, 115.040885, 32.797636]
+- 27-A: [103.272821, 25.195127, 103.789181, 25.893927]
+- 27-B: [103.789181, 25.195127, 104.305541, 25.893927]
+
+依据：
+- 河南使用原河南范围按经度中线切成左右两半。
+- 云南/原27区域使用原范围按经度中线切成左右两半。
+
+如果后续同事给更精确边界，需要同步修改：
+- configs/deployment_topology.local_192.json 的 theaters[].bounds
+- configs/theater_params/*.json 的 vehicle_scoring.fire_pool_bounds
+
+
+4. 车辆评分请求命令示例
+
+车辆 gateway：
+- 9190
+
+车辆本机：
+- 192.168.2.8
+
+节点IP按实际节点部署填写。示例：
+bash scripts/send_vehicle_score_requests_mapped.sh 192.168.2.8 9190 0.1 \
+  8414-8449=<节点IP_A> \
+  8450-8477=<节点IP_B> \
+  8605-8612=<节点IP_B> \
+  8519-8554=<节点IP_C> \
+  8555-8582=<节点IP_D> \
+  8613-8617=<节点IP_D>
+
+注意：
+- 这里的等号右侧是车辆向节点回传评分的目标IP，不是车辆本机IP。
+- 如果同事按四个旅分四个节点，右侧应分别填对应节点IP。
+
+
+5. 贮备库评分请求命令示例
+
+贮备库 gateway：
+- 9191
+
+贮备库本机：
+- 192.168.2.8
+
+示例：
+bash scripts/send_depot_score_requests_mapped.sh 192.168.2.8 9191 0.1 \
+  8651-8656=192.168.2.8 \
+  8657-8662=192.168.2.8 \
+  8663-8668=192.168.2.8 \
+  8669-8674=192.168.2.8
+
+
+6. 重新生成配置
+
+本次修改涉及端口和旅分组，必须重新 prepare：
+bash scripts/run_three_platform_flow.sh prepare \
+  --deployment-config configs/deployment_topology.local_192.json
+
+启动：
+bash scripts/run_three_platform_flow.sh scheduler \
+  --deployment-config configs/deployment_topology.local_192.json
+
+bash scripts/run_three_platform_flow.sh vehicles \
+  --deployment-config configs/deployment_topology.local_192.json
+
+bash scripts/run_three_platform_flow.sh depot \
+  --deployment-config configs/deployment_topology.local_192.json
+
+
+7. 代码侧支持点
+
+配置解析：
+- scripts/apply_deployment_config.py
+  - deployment_vehicle_ports() 汇总所有旅车辆端口
+  - theater_vehicle_ports() 支持 vehicle_port_ranges 非连续端口
+  - theater_for_port() 支持按非连续端口识别车辆所属旅
+
+调度运行时：
+- mvs/scheduler/scheduler_app.py
+  - _theater_vehicle_ports() 支持非连续端口
+  - _theater_for_vehicle() 根据车辆端口识别所属旅
+
+贮备库生成：
+- scripts/generate_depot_configs.py
+  - 按 theaters[].depot_count 顺序生成每旅贮备库配置
+  - 当前生成 8651-8674，共24个

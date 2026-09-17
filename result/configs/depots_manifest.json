@@ -1,0 +1,126 @@
+{
+  "gateway_config": "result/configs/depot_gateway.json",
+  "depots_dir": "result/configs/depots",
+  "depots": [
+    {
+      "port": 8601,
+      "group": "26D",
+      "config": "result/configs/depots/8601.json"
+    },
+    {
+      "port": 8602,
+      "group": "26D",
+      "config": "result/configs/depots/8602.json"
+    },
+    {
+      "port": 8603,
+      "group": "26D",
+      "config": "result/configs/depots/8603.json"
+    },
+    {
+      "port": 8604,
+      "group": "26D",
+      "config": "result/configs/depots/8604.json"
+    },
+    {
+      "port": 8605,
+      "group": "26D",
+      "config": "result/configs/depots/8605.json"
+    },
+    {
+      "port": 8606,
+      "group": "26D",
+      "config": "result/configs/depots/8606.json"
+    },
+    {
+      "port": 8607,
+      "group": "26D",
+      "config": "result/configs/depots/8607.json"
+    },
+    {
+      "port": 8608,
+      "group": "26D",
+      "config": "result/configs/depots/8608.json"
+    },
+    {
+      "port": 8609,
+      "group": "26D",
+      "config": "result/configs/depots/8609.json"
+    },
+    {
+      "port": 8610,
+      "group": "26D",
+      "config": "result/configs/depots/8610.json"
+    },
+    {
+      "port": 8611,
+      "group": "26D",
+      "config": "result/configs/depots/8611.json"
+    },
+    {
+      "port": 8612,
+      "group": "26D",
+      "config": "result/configs/depots/8612.json"
+    },
+    {
+      "port": 8613,
+      "group": "27",
+      "config": "result/configs/depots/8613.json"
+    },
+    {
+      "port": 8614,
+      "group": "27",
+      "config": "result/configs/depots/8614.json"
+    },
+    {
+      "port": 8615,
+      "group": "27",
+      "config": "result/configs/depots/8615.json"
+    },
+    {
+      "port": 8616,
+      "group": "27",
+      "config": "result/configs/depots/8616.json"
+    },
+    {
+      "port": 8617,
+      "group": "27",
+      "config": "result/configs/depots/8617.json"
+    },
+    {
+      "port": 8618,
+      "group": "27",
+      "config": "result/configs/depots/8618.json"
+    },
+    {
+      "port": 8619,
+      "group": "27",
+      "config": "result/configs/depots/8619.json"
+    },
+    {
+      "port": 8620,
+      "group": "27",
+      "config": "result/configs/depots/8620.json"
+    },
+    {
+      "port": 8621,
+      "group": "27",
+      "config": "result/configs/depots/8621.json"
+    },
+    {
+      "port": 8622,
+      "group": "27",
+      "config": "result/configs/depots/8622.json"
+    },
+    {
+      "port": 8623,
+      "group": "27",
+      "config": "result/configs/depots/8623.json"
+    },
+    {
+      "port": 8624,
+      "group": "27",
+      "config": "result/configs/depots/8624.json"
+    }
+  ]
+}

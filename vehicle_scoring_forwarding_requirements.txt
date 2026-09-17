@@ -1,0 +1,164 @@
+车辆评分上下文转发要求
+
+目的
+车辆端现在不再对全量发射点、隐蔽点、贮备库点位重复做路网投影。
+调度端统一完成特殊点位投影，并在车辆候选上下文中携带投影结果。
+因此模型/节点转发给车辆时，必须保留调度发出的上下文字段，否则车辆无法评分和规划。
+
+一、必须转发的消息
+
+1. TIME_BACKPLAN_CONTEXT
+
+要求：
+- msg_type 必须保持为 TIME_BACKPLAN_CONTEXT。
+- data/payload 内容必须原样保留。
+- 必须转发到本次参与评分的所有车辆。
+
+关键字段：
+- schema
+- task_id
+- fire_time
+- launch_prepare_time
+- launch_standby_time
+- standby_mode
+- subtasks
+
+2. VEHICLE_CANDIDATE_CONTEXT
+
+要求：
+- msg_type 必须保持为 VEHICLE_CANDIDATE_CONTEXT。
+- 不要改名为 VEHICLE_CONTEXT。
+- data/payload 内容必须原样保留。
+- 必须转发到本次参与评分的所有车辆，或者至少按 vehicle_id/vehicle_port 精确转发给对应车辆。
+
+顶层关键字段：
+- schema
+- task_id
+- vehicles
+
+vehicles 中每辆车必须保留：
+- vehicle_id
+- vehicle_port
+- candidate_launch_points
+
+candidate_launch_points 中每个候选发射点必须保留：
+- rank
+- launch_node
+- node_id
+- fire_point_id
+- name
+- index
+- lon
+- lat
+- alt
+- mapped_lon
+- mapped_lat
+- projection_from_node
+- projection_to_node
+- projection_ratio
+- projected_x
+- projected_y
+- hide_candidates
+- depot_candidates
+- allow_direct
+
+hide_candidates 中每个候选隐蔽点必须保留：
+- hide_node
+- node_id
+- hide_point_id
+- point_id
+- name
+- index
+- lon
+- lat
+- mapped_lon
+- mapped_lat
+- projection_from_node
+- projection_to_node
+- projection_ratio
+- projected_x
+- projected_y
+
+depot_candidates 中每个候选贮备库点必须保留：
+- depot_node
+- node_id
+- depot_id
+- point_id
+- name
+- index
+- lon
+- lat
+- mapped_lon
+- mapped_lat
+- projection_from_node
+- projection_to_node
+- projection_ratio
+- projected_x
+- projected_y
+- capacity
+
+二、车辆状态消息
+
+VEHICLE_CONTEXT 只能表示车辆自身位置、端口和回传地址，不能替代 VEHICLE_CANDIDATE_CONTEXT。
+
+VEHICLE_CONTEXT 常见字段：
+- vehicle_id
+- port
+- reply_port
+- msg_ip
+- lon
+- lat
+- alt
+- sim_time
+- type
+- name
+
+三、车辆为什么依赖这些字段
+
+车辆评分和路径规划需要同时满足：
+- 已收到车辆自身位置 VEHICLE_CONTEXT 或 VEHICLE_DIAN。
+- 已收到 TIME_BACKPLAN_CONTEXT。
+- 已收到 VEHICLE_CANDIDATE_CONTEXT。
+- 候选发射点和候选隐蔽点中带有调度端投影后的 node_id/edge projection 字段。
+
+如果缺 TIME_BACKPLAN_CONTEXT，车辆日志会出现：
+- vehicle_context_score_skipped reason=missing_time_backplan_context
+
+如果缺 VEHICLE_CANDIDATE_CONTEXT，车辆日志会出现：
+- vehicle_context_score_skipped reason=missing_candidate_context
+
+如果只收到原始 FA_SHE_DIAN/YIN_BI_DIAN/ZHU_BEI_DIAN，且没有投影字段，车辆日志会出现：
+- dian_context_projection_deferred reason=missing_projected_node_id
+- depot_dian_context_projection_deferred reason=missing_projected_node_id
+
+这个日志不是发送失败，而是表示车辆暂缓对全量点位做本地投影，等待 VEHICLE_CANDIDATE_CONTEXT 中的调度投影结果。
+
+四、正确链路
+
+调度 -> 模型/节点：
+- TIME_BACKPLAN_CONTEXT
+- VEHICLE_CANDIDATE_CONTEXT
+
+模型/节点 -> 车辆：
+- TIME_BACKPLAN_CONTEXT
+- VEHICLE_CANDIDATE_CONTEXT
+- VEHICLE_CONTEXT
+
+车辆 -> msg_ip:reply_port：
+- VEHICLE_SCORE_RESULT
+
+五、排查标准
+
+车辆日志中必须能看到：
+- time_backplan_context_received
+- vehicle_candidate_context_received
+- external_vehicle_state_received
+- vehicle_context_score_prepare
+
+随后才会出现：
+- vehicle_context_score_sent
+
+如果出现：
+- vehicle_context_score_send_failed
+
+说明车辆已经计算出分数，但目标 msg_ip:reply_port 无法连接、超时或对端未监听。
